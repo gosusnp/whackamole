@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gosusnp/whackamole/internal/types"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -77,7 +78,7 @@ func (s *ProjectStoreTestSuite) TestGet() {
 }
 
 func (s *ProjectStoreTestSuite) TestGetNotFound() {
-	_, err := s.store.Get(999)
+	_, err := s.store.Get(types.ProjectID(999))
 	s.Error(err)
 	s.Contains(err.Error(), "not found")
 }

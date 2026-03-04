@@ -35,10 +35,10 @@ func (s *ProjectStore) Create(name string) (*types.Project, error) {
 		return nil, fmt.Errorf("failed to get last insert id: %w", err)
 	}
 
-	return s.Get(id)
+	return s.Get(types.ProjectID(id))
 }
 
-func (s *ProjectStore) Get(id int64) (*types.Project, error) {
+func (s *ProjectStore) Get(id types.ProjectID) (*types.Project, error) {
 	var p types.Project
 	err := s.db.QueryRow("SELECT id, name, created_at, updated_at FROM projects WHERE id = ?", id).
 		Scan(&p.ID, &p.Name, &p.CreatedAt, &p.UpdatedAt)
@@ -74,7 +74,7 @@ func (s *ProjectStore) List() ([]types.Project, error) {
 	return projects, nil
 }
 
-func (s *ProjectStore) Update(id int64, name string) (*types.Project, error) {
+func (s *ProjectStore) Update(id types.ProjectID, name string) (*types.Project, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return nil, fmt.Errorf("project name cannot be empty")
@@ -87,7 +87,7 @@ func (s *ProjectStore) Update(id int64, name string) (*types.Project, error) {
 	return s.Get(id)
 }
 
-func (s *ProjectStore) Delete(id int64) error {
+func (s *ProjectStore) Delete(id types.ProjectID) error {
 	_, err := s.db.Exec("DELETE FROM projects WHERE id = ?", id)
 	if err != nil {
 		return fmt.Errorf("failed to delete project: %w", err)

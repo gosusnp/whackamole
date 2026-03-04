@@ -9,6 +9,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/gosusnp/whackamole/internal/db"
+	"github.com/gosusnp/whackamole/internal/types"
 	"github.com/spf13/cobra"
 )
 
@@ -88,7 +89,7 @@ var projectRmCmd = &cobra.Command{
 		defer database.Close()
 
 		store := db.NewProjectStore(database)
-		err = store.Delete(id)
+		err = store.Delete(types.ProjectID(id))
 		if err != nil {
 			return err
 		}
