@@ -9,15 +9,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var dbPath string
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "whack",
 	Short: "A small task manager for assisting agent coding",
 	Long: `whackAmole is a small task manager for assisting agent coding.
 The CLI tool, 'whack', helps manage and track tasks effectively during development sessions.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -30,11 +29,7 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.whackamole.yaml)")
+	rootCmd.PersistentFlags().StringVar(&dbPath, "db", "whackamole.db", "path to the sqlite database")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

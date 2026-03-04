@@ -1,0 +1,15 @@
+-- Copyright 2026 Jimmy Ma
+-- SPDX-License-Identifier: MIT
+
+CREATE TABLE IF NOT EXISTS projects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER IF NOT EXISTS update_projects_updated_at
+AFTER UPDATE ON projects
+BEGIN
+    UPDATE projects SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+END;

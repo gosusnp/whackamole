@@ -26,6 +26,7 @@ whack --help
 
 The project includes a `Makefile` for common development tasks:
 
+- `./whack-dev`: A wrapper for local development and testing.
 - `make build`: Build the `whack` binary.
 - `make check`: Run linting and tests.
 - `make clean`: Remove the built binary.

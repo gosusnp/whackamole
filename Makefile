@@ -6,7 +6,7 @@ check: lint test
 clean:
 	rm -f whack
 
-fix: fmt lint
+fix: fmt license-fix
 
 fmt:
 	gofmt -w .
