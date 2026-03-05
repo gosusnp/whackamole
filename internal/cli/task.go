@@ -87,7 +87,7 @@ var taskListCmd = &cobra.Command{
 		}
 
 		if len(tasks) == 0 {
-			fmt.Fprintln(cmd.OutOrStdout(), "No tasks found for this project.")
+			fmt.Fprintf(cmd.OutOrStdout(), "No tasks found for project %s.\n", p.Name)
 			return nil
 		}
 

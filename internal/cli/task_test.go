@@ -123,6 +123,24 @@ func TestTaskCommands(t *testing.T) {
 		}
 	})
 
+	t.Run("ListEmptyProject", func(t *testing.T) {
+		setup()
+		// Re-add p1 if it was removed
+		{
+			rootCmd.SetArgs([]string{"project", "add", "Test Project", "-k", "p1"})
+			_ = rootCmd.Execute()
+		}
+
+		b := bytes.NewBufferString("")
+		rootCmd.SetOut(b)
+		rootCmd.SetErr(b)
+		rootCmd.SetArgs([]string{"task", "list", "--project", "p1"})
+
+		err := rootCmd.Execute()
+		assert.NoError(t, err)
+		assert.Contains(t, b.String(), "No tasks found for project Test Project.")
+	})
+
 	t.Run("ListEmpty", func(t *testing.T) {
 		setup()
 		b := bytes.NewBufferString("")
