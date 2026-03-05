@@ -60,8 +60,18 @@ func (s *TaskStore) Get(id types.TaskID) (*types.Task, error) {
 	return &t, nil
 }
 
-func (s *TaskStore) ListByProject(projectID types.ProjectID) ([]types.Task, error) {
-	rows, err := s.db.Query("SELECT id, project_id, name, description, type, status, created_at, updated_at FROM tasks WHERE project_id = ? ORDER BY created_at DESC", projectID)
+func (s *TaskStore) ListByProject(projectID types.ProjectID, includeAll bool) ([]types.Task, error) {
+	query := "SELECT id, project_id, name, description, type, status, created_at, updated_at FROM tasks WHERE project_id = ?"
+	args := []interface{}{projectID}
+
+	if !includeAll {
+		query += " AND status NOT IN (?, ?)"
+		args = append(args, types.TaskStatusCompleted, types.TaskStatusClosed)
+	}
+
+	query += " ORDER BY created_at DESC"
+
+	rows, err := s.db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tasks: %w", err)
 	}

@@ -107,7 +107,7 @@ func listTasksHandler(taskStore *db.TaskStore, projectStore *db.ProjectStore) fu
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}
-		tasks, err := taskStore.ListByProject(p.ID)
+		tasks, err := taskStore.ListByProject(p.ID, true)
 		if err != nil {
 			return mcp.NewToolResultError(err.Error()), nil
 		}

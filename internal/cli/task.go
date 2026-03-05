@@ -23,6 +23,7 @@ var (
 	taskDesc   string
 	taskType   string
 	taskStatus string
+	taskAll    bool
 )
 
 var taskAddCmd = &cobra.Command{
@@ -81,13 +82,17 @@ var taskListCmd = &cobra.Command{
 		}
 
 		store := db.NewTaskStore(database)
-		tasks, err := store.ListByProject(p.ID)
+		tasks, err := store.ListByProject(p.ID, taskAll)
 		if err != nil {
 			return err
 		}
 
 		if len(tasks) == 0 {
-			fmt.Fprintf(cmd.OutOrStdout(), "No tasks found for project %s.\n", p.Name)
+			if taskAll {
+				fmt.Fprintf(cmd.OutOrStdout(), "No tasks found for project %s.\n", p.Name)
+			} else {
+				fmt.Fprintf(cmd.OutOrStdout(), "No unfinished tasks found for project %s.\n", p.Name)
+			}
 			return nil
 		}
 
@@ -230,6 +235,8 @@ func init() {
 	taskAddCmd.Flags().StringVarP(&taskDesc, "desc", "d", "", "Task description")
 	taskAddCmd.Flags().StringVarP(&taskType, "type", "t", string(types.TaskTypeFeat), "Task type (feat, fix, bug, docs, refactor, chore)")
 	taskAddCmd.Flags().StringVarP(&taskStatus, "status", "s", string(types.TaskStatusNotStarted), "Task status (notStarted, inProgress, blocked, completed, closed)")
+
+	taskListCmd.Flags().BoolVarP(&taskAll, "all", "a", false, "Show all tasks (including completed and closed)")
 
 	taskUpdateCmd.Flags().StringP("name", "n", "", "Task name")
 	taskUpdateCmd.Flags().StringP("desc", "d", "", "Task description")

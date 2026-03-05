@@ -138,6 +138,15 @@ func TestTaskCommands(t *testing.T) {
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
+		assert.Contains(t, b.String(), "No unfinished tasks found for project Test Project.")
+
+		// Test with --all
+		b = bytes.NewBufferString("")
+		rootCmd.SetOut(b)
+		rootCmd.SetErr(b)
+		rootCmd.SetArgs([]string{"task", "list", "--project", "p1", "--all"})
+		err = rootCmd.Execute()
+		assert.NoError(t, err)
 		assert.Contains(t, b.String(), "No tasks found for project Test Project.")
 	})
 

@@ -58,7 +58,7 @@ func TestMCPHandlers(t *testing.T) {
 		assert.Contains(t, result.Content[0].(mcp.TextContent).Text, "Task created")
 
 		// Verify task was actually created
-		tasks, err := taskStore.ListByProject(p.ID)
+		tasks, err := taskStore.ListByProject(p.ID, true)
 		assert.NoError(t, err)
 		assert.Len(t, tasks, 1)
 		assert.Equal(t, "New Task", tasks[0].Name)
@@ -77,7 +77,7 @@ func TestMCPHandlers(t *testing.T) {
 	})
 
 	t.Run("remove_task", func(t *testing.T) {
-		tasks, _ := taskStore.ListByProject(p.ID)
+		tasks, _ := taskStore.ListByProject(p.ID, true)
 		taskID := tasks[0].ID
 
 		handler := removeTaskHandler(taskStore)
@@ -91,7 +91,7 @@ func TestMCPHandlers(t *testing.T) {
 		assert.Contains(t, result.Content[0].(mcp.TextContent).Text, "removed")
 
 		// Verify task was actually removed
-		tasks, err = taskStore.ListByProject(p.ID)
+		tasks, err = taskStore.ListByProject(p.ID, true)
 		assert.NoError(t, err)
 		assert.Len(t, tasks, 0)
 	})

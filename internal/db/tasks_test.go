@@ -73,12 +73,19 @@ func (s *TaskStoreTestSuite) TestGet() {
 }
 
 func (s *TaskStoreTestSuite) TestListByProject() {
-	_, _ = s.taskStore.Create(s.project.ID, "Task 1", "", "", "")
-	_, _ = s.taskStore.Create(s.project.ID, "Task 2", "", "", "")
+	_, _ = s.taskStore.Create(s.project.ID, "Task 1", "", "", types.TaskStatusNotStarted)
+	_, _ = s.taskStore.Create(s.project.ID, "Task 2", "", "", types.TaskStatusCompleted)
 
-	tasks, err := s.taskStore.ListByProject(s.project.ID)
+	// List all
+	tasks, err := s.taskStore.ListByProject(s.project.ID, true)
 	s.NoError(err)
 	s.Len(tasks, 2)
+
+	// List only unfinished
+	tasks, err = s.taskStore.ListByProject(s.project.ID, false)
+	s.NoError(err)
+	s.Len(tasks, 1)
+	s.Equal("Task 1", tasks[0].Name)
 }
 
 func (s *TaskStoreTestSuite) TestUpdate() {
