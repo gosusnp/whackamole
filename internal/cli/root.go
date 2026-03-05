@@ -16,9 +16,9 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "whack",
-	Short: "A small task manager for assisting agent coding",
-	Long: `whackAmole is a small task manager for assisting agent coding.
-The CLI tool, 'whack', helps manage and track tasks effectively during development sessions.`,
+	Short: "Squash bugs and hammer down tasks with agent-grade precision.",
+	Long: `In the fast-paced world of agent-assisted coding, tasks can pop up like moles.
+whack gives you the tools to track, manage, and complete these tasks with speed and reliability.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
