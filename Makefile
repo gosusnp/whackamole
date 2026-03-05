@@ -11,6 +11,9 @@ fix: fmt license-fix
 fmt:
 	gofmt -w .
 
+install:
+	go install ./cmd/whack
+
 lint:
 	go vet ./...
 	go tool golangci-lint run ./...
