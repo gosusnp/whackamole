@@ -1,5 +1,6 @@
-VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
-LDFLAGS = -X "github.com/gosusnp/whackamole/internal.Version=$(VERSION)"
+VERSION ?= $(shell git describe --tags --dirty 2>/dev/null || echo "0.0.0-dev")
+COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
+LDFLAGS = -X "github.com/gosusnp/whackamole/internal.Version=$(VERSION)" -X "github.com/gosusnp/whackamole/internal.Commit=$(COMMIT)"
 
 build:
 	go build -ldflags '$(LDFLAGS)' -o whack ./cmd/whack

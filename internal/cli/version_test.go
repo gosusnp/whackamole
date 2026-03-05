@@ -19,6 +19,6 @@ func TestVersionCmd(t *testing.T) {
 	err := rootCmd.Execute()
 	assert.NoError(t, err)
 
-	expected := "whack version " + internal.Version + "\n"
+	expected := "whack version " + internal.Version + " (" + internal.Commit + ")\n"
 	assert.Equal(t, expected, b.String())
 }

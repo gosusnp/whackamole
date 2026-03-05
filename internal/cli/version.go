@@ -4,6 +4,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/gosusnp/whackamole/internal"
 	"github.com/spf13/cobra"
 )
@@ -14,11 +16,11 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of whack",
 	Long:  `All software has versions. This is whack's.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Printf("whack version %s\n", internal.Version)
+		cmd.Printf("whack version %s (%s)\n", internal.Version, internal.Commit)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.Version = internal.Version
+	rootCmd.Version = fmt.Sprintf("%s (%s)", internal.Version, internal.Commit)
 }
