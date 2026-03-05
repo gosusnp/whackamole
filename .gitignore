@@ -2,9 +2,9 @@
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 # Binaries for programs and plugins
-whack
-whackamole.db
-.whackamole.yaml
+/whack
+/whackamole.db
+/.whackamole.yaml
 *.exe
 *.exe~
 *.dll
