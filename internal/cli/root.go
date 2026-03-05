@@ -5,6 +5,7 @@ package cli
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -29,7 +30,13 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&dbPath, "db", "whackamole.db", "path to the sqlite database")
+	home, err := os.UserHomeDir()
+	defaultDBPath := "whackamole.db"
+	if err == nil {
+		defaultDBPath = filepath.Join(home, ".local", "share", "whackamole", "whackamole.db")
+	}
+
+	rootCmd.PersistentFlags().StringVar(&dbPath, "db", defaultDBPath, "path to the sqlite database")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
