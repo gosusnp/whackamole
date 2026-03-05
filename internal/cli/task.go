@@ -20,10 +20,9 @@ var taskCmd = &cobra.Command{
 }
 
 var (
-	taskDesc       string
-	taskType       string
-	taskStatus     string
-	taskProjectKey types.ProjectKey
+	taskDesc   string
+	taskType   string
+	taskStatus string
 )
 
 var taskAddCmd = &cobra.Command{
@@ -31,14 +30,19 @@ var taskAddCmd = &cobra.Command{
 	Short: "Add a new task",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		database, err := db.Open(dbPath)
+		projectKey := getProjectKey(cmd)
+		if projectKey == "" {
+			return fmt.Errorf("project key is required (use --project or set it in config)")
+		}
+
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}
 		defer database.Close()
 
 		pStore := db.NewProjectStore(database)
-		p, err := pStore.GetByKey(taskProjectKey)
+		p, err := pStore.GetByKey(types.ProjectKey(projectKey))
 		if err != nil {
 			return err
 		}
@@ -59,14 +63,19 @@ var taskListCmd = &cobra.Command{
 	Short: "List tasks for a project",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		database, err := db.Open(dbPath)
+		projectKey := getProjectKey(cmd)
+		if projectKey == "" {
+			return fmt.Errorf("project key is required (use --project or set it in config)")
+		}
+
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}
 		defer database.Close()
 
 		pStore := db.NewProjectStore(database)
-		p, err := pStore.GetByKey(taskProjectKey)
+		p, err := pStore.GetByKey(types.ProjectKey(projectKey))
 		if err != nil {
 			return err
 		}
@@ -102,7 +111,7 @@ var taskRmCmd = &cobra.Command{
 			return fmt.Errorf("invalid task id: %s", args[0])
 		}
 
-		database, err := db.Open(dbPath)
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}
@@ -129,7 +138,7 @@ var taskUpdateCmd = &cobra.Command{
 			return fmt.Errorf("invalid task id: %s", args[0])
 		}
 
-		database, err := db.Open(dbPath)
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}
@@ -184,7 +193,7 @@ var taskShowCmd = &cobra.Command{
 			return fmt.Errorf("invalid task id: %s", args[0])
 		}
 
-		database, err := db.Open(dbPath)
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}
@@ -217,9 +226,6 @@ func init() {
 	taskCmd.AddCommand(taskRmCmd)
 	taskCmd.AddCommand(taskUpdateCmd)
 	taskCmd.AddCommand(taskShowCmd)
-
-	taskCmd.PersistentFlags().StringVarP((*string)(&taskProjectKey), "project", "p", "", "Project key")
-	_ = taskCmd.MarkPersistentFlagRequired("project")
 
 	taskAddCmd.Flags().StringVarP(&taskDesc, "desc", "d", "", "Task description")
 	taskAddCmd.Flags().StringVarP(&taskType, "type", "t", string(types.TaskTypeFeat), "Task type (feat, fix, bug, docs, refactor, chore)")

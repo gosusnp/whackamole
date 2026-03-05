@@ -8,9 +8,10 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-var dbPath string
+var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -30,15 +31,65 @@ func Execute() {
 }
 
 func init() {
+	cobra.OnInitialize(initConfig)
+
 	home, err := os.UserHomeDir()
 	defaultDBPath := "whackamole.db"
 	if err == nil {
 		defaultDBPath = filepath.Join(home, ".local", "share", "whackamole", "whackamole.db")
 	}
 
-	rootCmd.PersistentFlags().StringVar(&dbPath, "db", defaultDBPath, "path to the sqlite database")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ~/.whackamole.yaml and then ./.whackamole.yaml)")
+	rootCmd.PersistentFlags().String("database", defaultDBPath, "path to the sqlite database")
+	rootCmd.PersistentFlags().StringP("project", "p", "", "default project key")
+}
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+// initConfig reads in config file and ENV variables if set.
+func initConfig() {
+	_ = viper.BindPFlag("database", rootCmd.PersistentFlags().Lookup("database"))
+	_ = viper.BindPFlag("project", rootCmd.PersistentFlags().Lookup("project"))
+
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+		_ = viper.ReadInConfig()
+	} else {
+		// Priority: ~/.whackamole.yaml < ./.whackamole.yaml
+		home, err := os.UserHomeDir()
+		if err == nil {
+			homeConfig := filepath.Join(home, ".whackamole.yaml")
+			if _, err := os.Stat(homeConfig); err == nil {
+				viper.SetConfigFile(homeConfig)
+				_ = viper.ReadInConfig()
+			}
+		}
+
+		localConfig := ".whackamole.yaml"
+		if _, err := os.Stat(localConfig); err == nil {
+			viper.SetConfigFile(localConfig)
+			if viper.ConfigFileUsed() != "" {
+				_ = viper.MergeInConfig()
+			} else {
+				_ = viper.ReadInConfig()
+			}
+		}
+	}
+
+	viper.AutomaticEnv() // read in environment variables that match
+}
+
+func getDBPath(cmd *cobra.Command) string {
+	if cmd.Flags().Changed("database") {
+		val, _ := cmd.Flags().GetString("database")
+		return val
+	}
+	return viper.GetString("database")
+}
+
+func getProjectKey(cmd *cobra.Command) string {
+	if cmd.Flags().Changed("project") {
+		val, _ := cmd.Flags().GetString("project")
+		return val
+	}
+	return viper.GetString("project")
 }

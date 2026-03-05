@@ -5,25 +5,46 @@ package cli
 
 import (
 	"bytes"
+	"os"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConfigCmd(t *testing.T) {
-	// Save the original dbPath and restore it after the test
-	originalDbPath := dbPath
-	defer func() { dbPath = originalDbPath }()
-
-	dbPath = "test-db.db"
+	// Reset viper for this test
+	viper.Reset()
+	viper.Set("database", "test-db.db")
+	viper.Set("project", "test-project")
 
 	b := bytes.NewBufferString("")
 	rootCmd.SetOut(b)
-	rootCmd.SetArgs([]string{"config"})
+	rootCmd.SetArgs([]string{"config", "show"})
 
 	err := rootCmd.Execute()
 	assert.NoError(t, err)
 
-	expected := "database: test-db.db\n"
+	expected := "database: test-db.db\nproject: test-project\n"
 	assert.Equal(t, expected, b.String())
+}
+
+func TestConfigSetLocalCmd(t *testing.T) {
+	// Clean up any existing .whackamole.yaml
+	os.Remove(".whackamole.yaml")
+	defer os.Remove(".whackamole.yaml")
+
+	b := bytes.NewBufferString("")
+	rootCmd.SetOut(b)
+	rootCmd.SetArgs([]string{"config", "set-local", "project", "my-project"})
+
+	err := rootCmd.Execute()
+	assert.NoError(t, err)
+
+	assert.Contains(t, b.String(), "Updated local config: project = my-project")
+
+	// Verify file content
+	data, err := os.ReadFile(".whackamole.yaml")
+	assert.NoError(t, err)
+	assert.Contains(t, string(data), "project: my-project")
 }

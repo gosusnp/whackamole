@@ -23,7 +23,7 @@ var projectAddCmd = &cobra.Command{
 	Short: "Add a new project",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		database, err := db.Open(dbPath)
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ var projectListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all projects",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		database, err := db.Open(dbPath)
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ var projectRmCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		key := types.ProjectKey(args[0])
 
-		database, err := db.Open(dbPath)
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}
@@ -109,7 +109,7 @@ var projectShowCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		key := types.ProjectKey(args[0])
 
-		database, err := db.Open(dbPath)
+		database, err := db.Open(getDBPath(cmd))
 		if err != nil {
 			return err
 		}

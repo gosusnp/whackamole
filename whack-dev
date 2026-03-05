@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-exec go run ./cmd/whack/main.go --db whackamole.db "$@"
+exec go run ./cmd/whack/main.go --database whackamole.db "$@"

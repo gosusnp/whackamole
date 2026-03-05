@@ -20,7 +20,7 @@ var mcpCmd = &cobra.Command{
 	Use:   "mcp",
 	Short: "Start the MCP server",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return startMCPServer()
+		return startMCPServer(cmd)
 	},
 }
 
@@ -28,8 +28,8 @@ func init() {
 	rootCmd.AddCommand(mcpCmd)
 }
 
-func startMCPServer() error {
-	s, err := createMCPServer(dbPath)
+func startMCPServer(cmd *cobra.Command) error {
+	s, err := createMCPServer(getDBPath(cmd))
 	if err != nil {
 		return err
 	}

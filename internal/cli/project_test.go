@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,10 +21,10 @@ func TestProjectCommands(t *testing.T) {
 	tmpFile.Close()
 	defer os.Remove(testDbPath)
 
-	// Save original dbPath and restore after
-	oldDbPath := dbPath
-	dbPath = testDbPath
-	defer func() { dbPath = oldDbPath }()
+	// Save original database and restore after
+	oldDbPath := getDBPath(rootCmd)
+	viper.Set("database", testDbPath)
+	defer func() { viper.Set("database", oldDbPath) }()
 
 	t.Run("Add", func(t *testing.T) {
 		b := bytes.NewBufferString("")

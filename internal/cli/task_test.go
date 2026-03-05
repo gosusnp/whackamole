@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,10 +21,12 @@ func TestTaskCommands(t *testing.T) {
 	tmpFile.Close()
 	defer os.Remove(testDbPath)
 
-	// Save original dbPath and restore after
-	oldDbPath := dbPath
-	dbPath = testDbPath
-	defer func() { dbPath = oldDbPath }()
+	// Save original database and restore after
+	oldDbPath := getDBPath(rootCmd)
+	viper.Set("database", testDbPath)
+	defer func() {
+		viper.Set("database", oldDbPath)
+	}()
 
 	// Need a project first
 	{
@@ -35,9 +38,17 @@ func TestTaskCommands(t *testing.T) {
 		require.NoError(t, err)
 	}
 
+	setup := func() {
+		viper.Reset()
+		viper.Set("database", testDbPath)
+		_ = rootCmd.PersistentFlags().Set("project", "")
+		rootCmd.PersistentFlags().Lookup("project").Changed = false
+		// Note: We need to re-initialize config/bindings because viper.Reset() cleared them
+		initConfig()
+	}
+
 	t.Run("Add", func(t *testing.T) {
-		taskProjectKey = ""
-		taskCmd.PersistentFlags().Lookup("project").Changed = false
+		setup()
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
@@ -50,8 +61,7 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("List", func(t *testing.T) {
-		taskProjectKey = ""
-		taskCmd.PersistentFlags().Lookup("project").Changed = false
+		setup()
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
@@ -63,8 +73,7 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("Show", func(t *testing.T) {
-		taskProjectKey = ""
-		taskCmd.PersistentFlags().Lookup("project").Changed = false
+		setup()
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
@@ -78,8 +87,7 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("Update", func(t *testing.T) {
-		taskProjectKey = ""
-		taskCmd.PersistentFlags().Lookup("project").Changed = false
+		setup()
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
@@ -91,8 +99,7 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("Rm", func(t *testing.T) {
-		taskProjectKey = ""
-		taskCmd.PersistentFlags().Lookup("project").Changed = false
+		setup()
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
@@ -104,8 +111,7 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("ListMissingProject", func(t *testing.T) {
-		taskProjectKey = ""
-		taskCmd.PersistentFlags().Lookup("project").Changed = false
+		setup()
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
@@ -113,13 +119,12 @@ func TestTaskCommands(t *testing.T) {
 
 		err := rootCmd.Execute()
 		if assert.Error(t, err) {
-			assert.Contains(t, err.Error(), "required flag(s) \"project\" not set")
+			assert.Contains(t, err.Error(), "project key is required")
 		}
 	})
 
 	t.Run("ListEmpty", func(t *testing.T) {
-		taskProjectKey = ""
-		taskCmd.PersistentFlags().Lookup("project").Changed = false
+		setup()
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
@@ -128,5 +133,24 @@ func TestTaskCommands(t *testing.T) {
 		err := rootCmd.Execute()
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "project not found with key: nonexistent")
+	})
+
+	t.Run("UseConfigProject", func(t *testing.T) {
+		setup()
+		viper.Set("project", "p1")
+		// Re-add p1 since it was deleted in Rm test
+		{
+			rootCmd.SetArgs([]string{"project", "add", "Test Project", "-k", "p1"})
+			_ = rootCmd.Execute()
+		}
+
+		b := bytes.NewBufferString("")
+		rootCmd.SetOut(b)
+		rootCmd.SetErr(b)
+		rootCmd.SetArgs([]string{"task", "add", "Task with config project"})
+
+		err := rootCmd.Execute()
+		assert.NoError(t, err)
+		assert.Contains(t, b.String(), "Task created")
 	})
 }
