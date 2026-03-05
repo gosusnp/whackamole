@@ -20,10 +20,10 @@ var taskCmd = &cobra.Command{
 }
 
 var (
-	taskDesc      string
-	taskType      string
-	taskStatus    string
-	taskProjectID int64
+	taskDesc       string
+	taskType       string
+	taskStatus     string
+	taskProjectKey types.ProjectKey
 )
 
 var taskAddCmd = &cobra.Command{
@@ -37,8 +37,14 @@ var taskAddCmd = &cobra.Command{
 		}
 		defer database.Close()
 
+		pStore := db.NewProjectStore(database)
+		p, err := pStore.GetByKey(taskProjectKey)
+		if err != nil {
+			return err
+		}
+
 		store := db.NewTaskStore(database)
-		t, err := store.Create(types.ProjectID(taskProjectID), args[0], taskDesc, types.TaskType(taskType), types.TaskStatus(taskStatus))
+		t, err := store.Create(p.ID, args[0], taskDesc, types.TaskType(taskType), types.TaskStatus(taskStatus))
 		if err != nil {
 			return err
 		}
@@ -59,8 +65,14 @@ var taskListCmd = &cobra.Command{
 		}
 		defer database.Close()
 
+		pStore := db.NewProjectStore(database)
+		p, err := pStore.GetByKey(taskProjectKey)
+		if err != nil {
+			return err
+		}
+
 		store := db.NewTaskStore(database)
-		tasks, err := store.ListByProject(types.ProjectID(taskProjectID))
+		tasks, err := store.ListByProject(p.ID)
 		if err != nil {
 			return err
 		}
@@ -206,7 +218,7 @@ func init() {
 	taskCmd.AddCommand(taskUpdateCmd)
 	taskCmd.AddCommand(taskShowCmd)
 
-	taskCmd.PersistentFlags().Int64VarP(&taskProjectID, "project", "p", 0, "Project ID")
+	taskCmd.PersistentFlags().StringVarP((*string)(&taskProjectKey), "project", "p", "", "Project key")
 	_ = taskCmd.MarkPersistentFlagRequired("project")
 
 	taskAddCmd.Flags().StringVarP(&taskDesc, "desc", "d", "", "Task description")

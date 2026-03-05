@@ -30,18 +30,18 @@ func TestTaskCommands(t *testing.T) {
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"project", "add", "Test Project"})
+		rootCmd.SetArgs([]string{"project", "add", "Test Project", "-k", "p1"})
 		err := rootCmd.Execute()
 		require.NoError(t, err)
 	}
 
 	t.Run("Add", func(t *testing.T) {
-		taskProjectID = 0
+		taskProjectKey = ""
 		taskCmd.PersistentFlags().Lookup("project").Changed = false
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"task", "add", "Test Task", "--project", "1", "--desc", "My Task"})
+		rootCmd.SetArgs([]string{"task", "add", "Test Task", "--project", "p1", "--desc", "My Task"})
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
@@ -50,12 +50,12 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("List", func(t *testing.T) {
-		taskProjectID = 0
+		taskProjectKey = ""
 		taskCmd.PersistentFlags().Lookup("project").Changed = false
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"task", "list", "-p", "1"})
+		rootCmd.SetArgs([]string{"task", "list", "-p", "p1"})
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
@@ -63,12 +63,12 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("Show", func(t *testing.T) {
-		taskProjectID = 0
+		taskProjectKey = ""
 		taskCmd.PersistentFlags().Lookup("project").Changed = false
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"task", "show", "1", "-p", "1"})
+		rootCmd.SetArgs([]string{"task", "show", "1", "-p", "p1"})
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
@@ -78,12 +78,12 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("Update", func(t *testing.T) {
-		taskProjectID = 0
+		taskProjectKey = ""
 		taskCmd.PersistentFlags().Lookup("project").Changed = false
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"task", "update", "1", "-p", "1", "--status", "inProgress"})
+		rootCmd.SetArgs([]string{"task", "update", "1", "-p", "p1", "--status", "inProgress"})
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
@@ -91,12 +91,12 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("Rm", func(t *testing.T) {
-		taskProjectID = 0
+		taskProjectKey = ""
 		taskCmd.PersistentFlags().Lookup("project").Changed = false
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"task", "rm", "1", "-p", "1"})
+		rootCmd.SetArgs([]string{"task", "rm", "1", "-p", "p1"})
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
@@ -104,7 +104,7 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("ListMissingProject", func(t *testing.T) {
-		taskProjectID = 0
+		taskProjectKey = ""
 		taskCmd.PersistentFlags().Lookup("project").Changed = false
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
@@ -118,15 +118,15 @@ func TestTaskCommands(t *testing.T) {
 	})
 
 	t.Run("ListEmpty", func(t *testing.T) {
-		taskProjectID = 0
+		taskProjectKey = ""
 		taskCmd.PersistentFlags().Lookup("project").Changed = false
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"task", "list", "--project", "999"})
+		rootCmd.SetArgs([]string{"task", "list", "--project", "nonexistent"})
 
 		err := rootCmd.Execute()
-		assert.NoError(t, err)
-		assert.Contains(t, b.String(), "No tasks found")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "project not found with key: nonexistent")
 	})
 }

@@ -34,7 +34,7 @@ func (s *TaskStoreTestSuite) SetupTest() {
 	s.taskStore = NewTaskStore(database)
 
 	// Create a project for the tasks
-	p, err := s.projectStore.Create("Test Project")
+	p, err := s.projectStore.Create("Test Project", "tp1")
 	s.NoError(err)
 	s.project = p
 }

@@ -5,7 +5,6 @@ package cli
 
 import (
 	"fmt"
-	"strconv"
 	"text/tabwriter"
 
 	"github.com/gosusnp/whackamole/internal/db"
@@ -30,13 +29,15 @@ var projectAddCmd = &cobra.Command{
 		}
 		defer database.Close()
 
+		key, _ := cmd.Flags().GetString("key")
+
 		store := db.NewProjectStore(database)
-		p, err := store.Create(args[0])
+		p, err := store.Create(args[0], types.ProjectKey(key))
 		if err != nil {
 			return err
 		}
 
-		fmt.Fprintf(cmd.OutOrStdout(), "Project created: %d - %s\n", p.ID, p.Name)
+		fmt.Fprintf(cmd.OutOrStdout(), "Project created: %s (%s)\n", p.Name, p.Key)
 		return nil
 	},
 }
@@ -63,9 +64,9 @@ var projectListCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tNAME\tCREATED AT")
+		fmt.Fprintln(w, "KEY\tNAME\tCREATED AT")
 		for _, p := range projects {
-			fmt.Fprintf(w, "%d\t%s\t%s\n", p.ID, p.Name, p.CreatedAt.Format("2006-01-02 15:04:05"))
+			fmt.Fprintf(w, "%s\t%s\t%s\n", p.Key, p.Name, p.CreatedAt.Format("2006-01-02 15:04:05"))
 		}
 		w.Flush()
 		return nil
@@ -73,14 +74,11 @@ var projectListCmd = &cobra.Command{
 }
 
 var projectRmCmd = &cobra.Command{
-	Use:   "rm <id>",
+	Use:   "rm <key>",
 	Short: "Remove a project",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		id, err := strconv.ParseInt(args[0], 10, 64)
-		if err != nil {
-			return fmt.Errorf("invalid project id: %s", args[0])
-		}
+		key := types.ProjectKey(args[0])
 
 		database, err := db.Open(dbPath)
 		if err != nil {
@@ -89,12 +87,17 @@ var projectRmCmd = &cobra.Command{
 		defer database.Close()
 
 		store := db.NewProjectStore(database)
-		err = store.Delete(types.ProjectID(id))
+		p, err := store.GetByKey(key)
 		if err != nil {
 			return err
 		}
 
-		fmt.Fprintf(cmd.OutOrStdout(), "Project %d removed.\n", id)
+		err = store.Delete(p.ID)
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintf(cmd.OutOrStdout(), "Project %s removed.\n", key)
 		return nil
 	},
 }
@@ -104,4 +107,6 @@ func init() {
 	projectCmd.AddCommand(projectAddCmd)
 	projectCmd.AddCommand(projectListCmd)
 	projectCmd.AddCommand(projectRmCmd)
+
+	projectAddCmd.Flags().StringP("key", "k", "", "Project key (optional, will be generated if not provided)")
 }

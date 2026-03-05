@@ -29,12 +29,11 @@ func TestProjectCommands(t *testing.T) {
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"project", "add", "Test Project"})
+		rootCmd.SetArgs([]string{"project", "add", "Test Project", "-k", "p1"})
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
-		assert.Contains(t, b.String(), "Project created")
-		assert.Contains(t, b.String(), "Test Project")
+		assert.Contains(t, b.String(), "Project created: Test Project (p1)\n")
 	})
 
 	t.Run("List", func(t *testing.T) {
@@ -45,6 +44,7 @@ func TestProjectCommands(t *testing.T) {
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
+		assert.Contains(t, b.String(), "p1")
 		assert.Contains(t, b.String(), "Test Project")
 	})
 
@@ -52,11 +52,11 @@ func TestProjectCommands(t *testing.T) {
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
 		rootCmd.SetErr(b)
-		rootCmd.SetArgs([]string{"project", "rm", "1"})
+		rootCmd.SetArgs([]string{"project", "rm", "p1"})
 
 		err := rootCmd.Execute()
 		assert.NoError(t, err)
-		assert.Contains(t, b.String(), "Project 1 removed")
+		assert.Contains(t, b.String(), "Project p1 removed")
 	})
 
 	t.Run("ListEmpty", func(t *testing.T) {
