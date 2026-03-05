@@ -102,11 +102,42 @@ var projectRmCmd = &cobra.Command{
 	},
 }
 
+var projectShowCmd = &cobra.Command{
+	Use:   "show <key>",
+	Short: "Show project details",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		key := types.ProjectKey(args[0])
+
+		database, err := db.Open(dbPath)
+		if err != nil {
+			return err
+		}
+		defer database.Close()
+
+		store := db.NewProjectStore(database)
+		p, err := store.GetByKey(key)
+		if err != nil {
+			return err
+		}
+
+		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
+		fmt.Fprintf(w, "ID:\t%d\n", p.ID)
+		fmt.Fprintf(w, "Key:\t%s\n", p.Key)
+		fmt.Fprintf(w, "Name:\t%s\n", p.Name)
+		fmt.Fprintf(w, "Created At:\t%s\n", p.CreatedAt.Format("2006-01-02 15:04:05"))
+		fmt.Fprintf(w, "Updated At:\t%s\n", p.UpdatedAt.Format("2006-01-02 15:04:05"))
+		w.Flush()
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(projectCmd)
 	projectCmd.AddCommand(projectAddCmd)
 	projectCmd.AddCommand(projectListCmd)
 	projectCmd.AddCommand(projectRmCmd)
+	projectCmd.AddCommand(projectShowCmd)
 
 	projectAddCmd.Flags().StringP("key", "k", "", "Project key (optional, will be generated if not provided)")
 }

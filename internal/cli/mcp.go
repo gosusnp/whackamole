@@ -58,6 +58,12 @@ func createMCPServer(path string) (*server.MCPServer, error) {
 		mcp.WithString("projectKey", mcp.Required(), mcp.Description("The Key of the project")),
 	), listTasksHandler(taskStore, projectStore))
 
+	// Show Project
+	s.AddTool(mcp.NewTool("show_project",
+		mcp.WithDescription("Show detailed information for a project"),
+		mcp.WithString("projectKey", mcp.Required(), mcp.Description("The Key of the project")),
+	), showProjectHandler(projectStore))
+
 	// Show Task
 	s.AddTool(mcp.NewTool("show_task",
 		mcp.WithDescription("Show detailed information for a task"),
@@ -114,6 +120,22 @@ func listTasksHandler(taskStore *db.TaskStore, projectStore *db.ProjectStore) fu
 		for _, t := range tasks {
 			result += fmt.Sprintf("ID: %d, Name: %s, Status: %s, Type: %s\n", t.ID, t.Name, t.Status, t.Type)
 		}
+
+		return mcp.NewToolResultText(result), nil
+	}
+}
+
+func showProjectHandler(projectStore *db.ProjectStore) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args := request.Params.Arguments.(map[string]any)
+		pKey := types.ProjectKey(args["projectKey"].(string))
+		p, err := projectStore.GetByKey(pKey)
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+
+		result := fmt.Sprintf("ID: %d\nKey: %s\nName: %s\nCreated At: %s\nUpdated At: %s\n",
+			p.ID, p.Key, p.Name, p.CreatedAt, p.UpdatedAt)
 
 		return mcp.NewToolResultText(result), nil
 	}

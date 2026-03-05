@@ -48,6 +48,20 @@ func TestProjectCommands(t *testing.T) {
 		assert.Contains(t, b.String(), "Test Project")
 	})
 
+	t.Run("Show", func(t *testing.T) {
+		b := bytes.NewBufferString("")
+		rootCmd.SetOut(b)
+		rootCmd.SetErr(b)
+		rootCmd.SetArgs([]string{"project", "show", "p1"})
+
+		err := rootCmd.Execute()
+		assert.NoError(t, err)
+		assert.Contains(t, b.String(), "Key:")
+		assert.Contains(t, b.String(), "p1")
+		assert.Contains(t, b.String(), "Name:")
+		assert.Contains(t, b.String(), "Test Project")
+	})
+
 	t.Run("Rm", func(t *testing.T) {
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)
