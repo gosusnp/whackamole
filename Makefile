@@ -1,8 +1,10 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
-LDFLAGS = -X github.com/gosusnp/whackamole/internal.Version=$(VERSION)
+LDFLAGS = -X "github.com/gosusnp/whackamole/internal.Version=$(VERSION)"
 
 build:
-	go build -ldflags "$(LDFLAGS)" -o whack github.com/gosusnp/whackamole/cmd/whack
+	pwd
+	ls
+	go build -ldflags '$(LDFLAGS)' -o whack ./cmd/whack/main.go
 
 check: lint test
 
