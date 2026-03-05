@@ -9,6 +9,7 @@ This file provides context and instructions for AI agents working on the `whacka
 ## Architectural Mandates
 - **Fat Store Pattern**: All data validation and business logic must reside in `internal/db/`. Do not perform validation in the CLI layer.
 - **Hardened Types**: Use domain-specific types (e.g., `types.ProjectID`) instead of raw primitives (e.g., `int64`) for identifiers and other domain values to enhance type safety.
+- **JSON Casing**: Use `camelCase` for JSON tags in all type definitions (e.g., `json:"projectId"`).
 - **Embedded Migrations**: Database schema changes must be added to `internal/db/migrations/` and will be automatically applied on `db.Open`.
 - **Database**: Use SQLite via `modernc.org/sqlite` (CGO-free).
 - **CLI**: Use Cobra for command-line interface. Use `cmd.OutOrStdout()` for all output to ensure testability.
