@@ -24,7 +24,7 @@ fmt-check:
 	fi
 
 install:
-	go install ./cmd/whack
+	go install -ldflags '$(LDFLAGS)' ./cmd/whack
 
 license-check:
 	go tool addlicense -check -l mit -c "Jimmy Ma" -s=only .
