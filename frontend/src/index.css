@@ -12,48 +12,35 @@
 }
 
 @layer components {
+  /* Typography */
+  .heading-level-1 { @apply text-3xl font-bold mb-8 text-text-base; }
+  .heading-level-2 { @apply text-xl font-semibold mb-4 text-text-base; }
+  .heading-level-3 { @apply text-lg font-medium mb-2 text-text-base; }
+  
+  .text-base { @apply text-sm text-text-base leading-relaxed; }
+  .text-muted { @apply text-text-muted; }
+  .text-small { @apply text-xs; }
+
   /* Layout: Columns */
-  .layout-columns {
-    @apply flex flex-row gap-4 w-full;
-  }
-  .layout-columns-vertical {
-    @apply flex-col;
-  }
-  .column-flex {
-    @apply flex-1 min-w-0;
-  }
+  .layout-columns { @apply flex flex-row gap-4 w-full; }
+  .layout-columns-vertical { @apply flex-col; }
+  .column-flex { @apply flex-1 min-w-0; }
 
   /* Container: Cards */
-  .card-base {
-    @apply bg-bg-surface border border-border-base rounded-lg p-4 shadow-sm;
-  }
-  .card-header {
-    @apply mb-4 pb-2 border-b border-border-base;
-  }
-  .card-title {
-    @apply text-lg font-semibold text-text-base;
-  }
-  .card-footer {
-    @apply mt-4 pt-2 border-t border-border-base;
-  }
+  .card-base { @apply bg-bg-surface border border-border-base rounded-lg p-4 shadow-sm; }
+  .card-header { @apply mb-4 pb-2 border-b border-border-base; }
+  .card-title { @apply text-lg font-semibold text-text-base; }
+  .card-footer { @apply mt-4 pt-2 border-t border-border-base; }
 
   /* Interaction: Tabs */
-  .tabs-root {
-    @apply flex flex-col w-full;
-  }
-  .tabs-list {
-    @apply flex border-b border-border-base gap-2 mb-4;
-  }
+  .tabs-root { @apply flex flex-col w-full; }
+  .tabs-list { @apply flex border-b border-border-base gap-2 mb-4; }
   .tabs-trigger {
     @apply px-4 py-2 text-sm font-medium text-text-muted border-b-2 border-transparent transition-colors;
     @apply hover:text-text-base;
   }
-  .tabs-trigger[data-state="active"] {
-    @apply text-brand-primary border-brand-primary;
-  }
-  .tabs-content {
-    @apply outline-none;
-  }
+  .tabs-trigger[data-state="active"] { @apply text-brand-primary border-brand-primary; }
+  .tabs-content { @apply outline-none; }
 }
 
 :root {
