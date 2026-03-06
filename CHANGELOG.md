@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.2](https://github.com/gosusnp/whackamole/compare/v0.0.1...v0.0.2) (2026-03-06)
+
+
+### Bug Fixes
+
+* clean up release-please-config ([33bf51d](https://github.com/gosusnp/whackamole/commit/33bf51d87f7d3deffbe0a9d6b0e1c3b553c53140))
+* fix release please workflow ([60b368d](https://github.com/gosusnp/whackamole/commit/60b368d2c20ee04ccc733dc7bd0ab3b012d501a9))
+
 ## 0.0.1 (2026-03-05)
 
 
