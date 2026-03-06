@@ -3,11 +3,18 @@
  * SPDX-License-Identifier: MIT
  */
 
+import { useState } from 'preact/hooks';
 import { Card } from '../components/ui/Card';
 import { Columns, Column } from '../components/ui/Columns';
 import { Tabs } from '../components/ui/Tabs';
+import { Popover } from '../components/ui/Popover';
+import { ToggleGroup } from '../components/ui/ToggleGroup';
+import { Heading } from '../components/ui/Heading';
+import { Text } from '../components/ui/Text';
 
 export function DesignElements() {
+  const [toggleValue, setToggleValue] = useState('left');
+
   const tabItems = [
     {
       id: 'tab1',
@@ -16,12 +23,12 @@ export function DesignElements() {
         <Columns>
           <Column>
             <Card title="Column 1">
-              <p>This is the first column in a flexible layout.</p>
+              <Text>This is the first column in a flexible layout.</Text>
             </Card>
           </Column>
           <Column>
             <Card title="Column 2">
-              <p>This is the second column in a flexible layout.</p>
+              <Text>This is the second column in a flexible layout.</Text>
             </Card>
           </Column>
         </Columns>
@@ -29,39 +36,45 @@ export function DesignElements() {
     },
     {
       id: 'tab2',
-      label: 'Containers',
+      label: 'Interactive',
       content: (
-        <Card title="Detailed Card" footer={<p>Footer content here</p>}>
-          <p>Cards are the building blocks of our UI. They can have optional headers and footers.</p>
-        </Card>
+        <Columns vertical>
+          <Column>
+            <Card title="Popover & Toggle Group">
+              <div className="flex items-center gap-4">
+                <Text>Current Value: {toggleValue}</Text>
+                <Popover
+                  trigger={
+                    <button className="px-4 py-2 bg-bg-muted border border-border-base rounded text-sm text-text-base">
+                      Open Menu
+                    </button>
+                  }
+                >
+                  <div className="flex flex-col gap-2">
+                    <Text small muted>Select an option:</Text>
+                    <ToggleGroup
+                      value={toggleValue}
+                      onValueChange={setToggleValue}
+                      items={[
+                        { value: 'left', label: 'Left' },
+                        { value: 'center', label: 'Center' },
+                        { value: 'right', label: 'Right' },
+                      ]}
+                    />
+                  </div>
+                </Popover>
+              </div>
+            </Card>
+          </Column>
+        </Columns>
       ),
     },
   ];
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Gold Standard Elements</h1>
-      
-      <section className="mb-12">
-        <h2 className="text-xl font-semibold mb-4 text-brand-primary">Tabs & Layout</h2>
-        <Tabs items={tabItems} />
-      </section>
-
-      <section className="mb-12">
-        <h2 className="text-xl font-semibold mb-4 text-brand-primary">Vertical Columns</h2>
-        <Columns vertical>
-          <Column>
-            <Card title="Stack 1">
-              <p>Vertical columns allow for stacking components with consistent spacing.</p>
-            </Card>
-          </Column>
-          <Column>
-            <Card title="Stack 2">
-              <p>Useful for sidebars or vertical lists.</p>
-            </Card>
-          </Column>
-        </Columns>
-      </section>
+      <Heading level={1}>Gold Standard Elements</Heading>
+      <Tabs items={tabItems} />
     </div>
   );
 }

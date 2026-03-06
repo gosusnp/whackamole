@@ -7,6 +7,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { Card } from '../components/ui/Card';
 import { Columns, Column } from '../components/ui/Columns';
 import { Text } from '../components/ui/Text';
+import { TaskStatusBadge } from './TaskStatusBadge';
 
 interface Task {
   id: number;
@@ -25,7 +26,7 @@ export function TaskList({ projectId }: TaskListProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchTasks = () => {
     fetch(`/api/tasks?projectId=${projectId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -33,7 +34,19 @@ export function TaskList({ projectId }: TaskListProps) {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchTasks();
   }, [projectId]);
+
+  const handleStatusUpdate = (taskId: number, newStatus: string) => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.id === taskId ? { ...task, status: newStatus } : task
+      )
+    );
+  };
 
   if (loading) return <Text muted>Loading tasks...</Text>;
   if (tasks.length === 0) return <Text muted>No tasks found.</Text>;
@@ -43,10 +56,17 @@ export function TaskList({ projectId }: TaskListProps) {
       {tasks.map((task) => (
         <Column key={task.id}>
           <Card title={task.name}>
-            <Text>{task.description}</Text>
-            <Text small muted>
-              {task.type} — {task.status}
-            </Text>
+            <div className="flex flex-col gap-3">
+              <Text>{task.description}</Text>
+              <div className="flex items-center gap-3">
+                <Text small muted>{task.type}</Text>
+                <div className="w-px h-3 bg-border-base" />
+                <TaskStatusBadge 
+                  task={task} 
+                  onStatusUpdate={(newStatus) => handleStatusUpdate(task.id, newStatus)}
+                />
+              </div>
+            </div>
           </Card>
         </Column>
       ))}
