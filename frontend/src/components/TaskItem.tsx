@@ -44,20 +44,19 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
 
     setIsSaving(true);
     try {
-      const updatedTask = {
-        ...task,
+      const updates = {
         name: name,
         description: description,
       };
 
       const response = await fetch(`/api/tasks/${task.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedTask),
+        body: JSON.stringify(updates),
       });
 
       if (response.ok) {
-        onUpdate(task.id, { name, description });
+        onUpdate(task.id, updates);
         setIsEditing(false);
         setNameError('');
       } else {

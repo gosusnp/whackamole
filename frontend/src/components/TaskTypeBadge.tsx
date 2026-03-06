@@ -36,15 +36,14 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
     setIsOpen(false);
 
     try {
-      const updatedTask = {
-        ...task,
+      const updates = {
         type: newType,
       };
 
       const response = await fetch(`/api/tasks/${task.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedTask),
+        body: JSON.stringify(updates),
       });
 
       if (response.ok) {

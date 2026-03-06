@@ -90,8 +90,18 @@ describe('TaskStatusBadge', () => {
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         `/api/tasks/${mockTask.id}`,
-        expect.objectContaining({ method: 'PUT' }),
+        expect.objectContaining({
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'inProgress' }),
+        }),
       );
+      // Ensure no other fields from the task are sent
+      const lastCallBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(lastCallBody).not.toHaveProperty('name');
+      expect(lastCallBody).not.toHaveProperty('description');
+      expect(lastCallBody).not.toHaveProperty('type');
+      expect(lastCallBody).not.toHaveProperty('id');
+
       expect(onStatusUpdate).toHaveBeenCalledWith('inProgress');
     });
   });

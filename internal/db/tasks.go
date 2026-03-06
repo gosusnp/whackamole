@@ -107,6 +107,73 @@ func (s *TaskStore) Update(id types.TaskID, name, description string, taskType t
 	return s.Get(id)
 }
 
+func (s *TaskStore) Patch(id types.TaskID, updates map[string]interface{}) (*types.Task, error) {
+	if len(updates) == 0 {
+		return s.Get(id)
+	}
+
+	var setClauses []string
+	var args []interface{}
+
+	for k, v := range updates {
+		switch k {
+		case "name":
+			name, ok := v.(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid name type")
+			}
+			name = strings.TrimSpace(name)
+			if name == "" {
+				return nil, fmt.Errorf("task name cannot be empty")
+			}
+			setClauses = append(setClauses, "name = ?")
+			args = append(args, name)
+		case "description":
+			description, ok := v.(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid description type")
+			}
+			setClauses = append(setClauses, "description = ?")
+			args = append(args, description)
+		case "type":
+			taskType, ok := v.(types.TaskType)
+			if !ok {
+				// Also support string for JSON unmarshaling
+				if s, ok := v.(string); ok {
+					taskType = types.TaskType(s)
+				} else {
+					return nil, fmt.Errorf("invalid type type")
+				}
+			}
+			setClauses = append(setClauses, "type = ?")
+			args = append(args, taskType)
+		case "status":
+			status, ok := v.(types.TaskStatus)
+			if !ok {
+				// Also support string for JSON unmarshaling
+				if s, ok := v.(string); ok {
+					status = types.TaskStatus(s)
+				} else {
+					return nil, fmt.Errorf("invalid status type")
+				}
+			}
+			setClauses = append(setClauses, "status = ?")
+			args = append(args, status)
+		default:
+			return nil, fmt.Errorf("unknown field: %s", k)
+		}
+	}
+
+	query := fmt.Sprintf("UPDATE tasks SET %s WHERE id = ?", strings.Join(setClauses, ", "))
+	args = append(args, id)
+
+	_, err := s.db.Exec(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to patch task: %w", err)
+	}
+	return s.Get(id)
+}
+
 func (s *TaskStore) Delete(id types.TaskID) error {
 	_, err := s.db.Exec("DELETE FROM tasks WHERE id = ?", id)
 	if err != nil {

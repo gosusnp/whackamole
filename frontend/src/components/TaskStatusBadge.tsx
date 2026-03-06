@@ -35,15 +35,14 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
     setIsOpen(false); // Close immediately for a smoother UI
 
     try {
-      const updatedTask = {
-        ...task,
+      const updates = {
         status: newStatus,
       };
 
       const response = await fetch(`/api/tasks/${task.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedTask),
+        body: JSON.stringify(updates),
       });
 
       if (response.ok) {

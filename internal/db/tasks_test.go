@@ -98,6 +98,33 @@ func (s *TaskStoreTestSuite) TestUpdate() {
 	s.Equal(types.TaskStatusInProgress, updated.Status)
 }
 
+func (s *TaskStoreTestSuite) TestPatch() {
+	t, _ := s.taskStore.Create(s.project.ID, "Original Name", "Original Desc", types.TaskTypeFeat, types.TaskStatusNotStarted)
+
+	// Patch only name
+	patched, err := s.taskStore.Patch(t.ID, map[string]interface{}{"name": "Patched Name"})
+	s.NoError(err)
+	s.Equal("Patched Name", patched.Name)
+	s.Equal("Original Desc", patched.Description)
+	s.Equal(types.TaskTypeFeat, patched.Type)
+	s.Equal(types.TaskStatusNotStarted, patched.Status)
+
+	// Patch status and type
+	patched, err = s.taskStore.Patch(t.ID, map[string]interface{}{
+		"status": types.TaskStatusInProgress,
+		"type":   types.TaskTypeBug,
+	})
+	s.NoError(err)
+	s.Equal("Patched Name", patched.Name)
+	s.Equal(types.TaskStatusInProgress, patched.Status)
+	s.Equal(types.TaskTypeBug, patched.Type)
+
+	// Test validation in Patch
+	_, err = s.taskStore.Patch(t.ID, map[string]interface{}{"name": ""})
+	s.Error(err)
+	s.Contains(err.Error(), "cannot be empty")
+}
+
 func (s *TaskStoreTestSuite) TestDelete() {
 	t, _ := s.taskStore.Create(s.project.ID, "Delete", "", "", "")
 	err := s.taskStore.Delete(t.ID)

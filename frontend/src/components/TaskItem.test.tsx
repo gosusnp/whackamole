@@ -101,10 +101,20 @@ describe('TaskItem', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         `/api/tasks/${mockTask.id}`,
         expect.objectContaining({
-          method: 'PUT',
+          method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'Updated name',
+            description: 'Some description',
+          }),
         }),
       );
+      // Verify no other fields like status or type are leaked into the body
+      const lastCallBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(lastCallBody).not.toHaveProperty('status');
+      expect(lastCallBody).not.toHaveProperty('type');
+      expect(lastCallBody).not.toHaveProperty('id');
+
       expect(onUpdate).toHaveBeenCalledWith(mockTask.id, {
         name: 'Updated name',
         description: 'Some description',
