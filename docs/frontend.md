@@ -43,6 +43,18 @@ All "Gold Standard" elements are demoed at the `/design-elements` route.
 | `Column` | Child component for `Columns` to define flexible grid items. |
 | `Tabs` | Accessible tabbed interface powered by Radix UI. |
 
+## CLI Integration
+
+The frontend is built into a set of static files and embedded into the Go binary.
+
+- **Build Output**: The `vite build` process is configured to output to `../internal/cli/static`.
+- **Embedding**: The `internal/cli/ui.go` file uses Go's `embed` package to include this directory:
+  ```go
+  //go:embed static
+  var staticFS embed.FS
+  ```
+- **Serving**: The `whack ui` command starts an HTTP server that serves these static files and provides a local API for data persistence.
+
 ## Development Workflow
 
 ### Running Locally

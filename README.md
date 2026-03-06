@@ -71,6 +71,24 @@ When connected via MCP, agents have access to the following tools:
 - `show_project`: Get detailed information about a project.
 - `show_task`: Get detailed information about a specific task.
 
+## 🌐 Web UI
+
+For a more visual experience, `whackAmole` includes an embedded web interface.
+
+```bash
+whack ui
+```
+
+By default, the UI will be available at `http://localhost:8080`. You can specify a different port using the `--port` flag:
+
+```bash
+whack ui --port 9000
+```
+
+The Web UI allows you to:
+- Browse projects and tasks.
+- Create and edit tasks with a rich Markdown editor.
+
 ## 💻 Development
 
 The project includes a `Makefile` for common development tasks:
