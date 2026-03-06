@@ -75,7 +75,7 @@ func createMCPServer(path string) (*server.MCPServer, error) {
 		mcp.WithDescription("Add a new task to a project"),
 		mcp.WithString("projectKey", mcp.Required(), mcp.Description("The Key of the project")),
 		mcp.WithString("name", mcp.Required(), mcp.Description("The name of the task")),
-		mcp.WithString("description", mcp.Description("The description of the task")),
+		mcp.WithString("description", mcp.Description("The description of the task (supports Markdown)")),
 		mcp.WithString("type", mcp.Description("The type of the task (feat, fix, bug, docs, refactor, chore)")),
 		mcp.WithString("status", mcp.Description("The status of the task (notStarted, inProgress, blocked, completed, closed)")),
 	), addTaskHandler(taskStore, projectStore))
@@ -85,7 +85,7 @@ func createMCPServer(path string) (*server.MCPServer, error) {
 		mcp.WithDescription("Update an existing task"),
 		mcp.WithNumber("taskId", mcp.Required(), mcp.Description("The ID of the task")),
 		mcp.WithString("name", mcp.Description("The new name of the task")),
-		mcp.WithString("description", mcp.Description("The new description of the task")),
+		mcp.WithString("description", mcp.Description("The new description of the task (supports Markdown)")),
 		mcp.WithString("type", mcp.Description("The new type of the task")),
 		mcp.WithString("status", mcp.Description("The new status of the task")),
 	), updateTaskHandler(taskStore))
