@@ -12,8 +12,12 @@ interface RowProps {
   gap?: 2 | 4 | 6 | 8;
 }
 
+const justifyMap = { start: 'justify-start', center: 'justify-center', end: 'justify-end', between: 'justify-between' } as const;
+const itemsMap = { start: 'items-start', center: 'items-center', end: 'items-end', baseline: 'items-baseline' } as const;
+const gapMap = { 2: 'gap-2', 4: 'gap-4', 6: 'gap-6', 8: 'gap-8' } as const;
+
 export function Row({ children, justify = 'start', items = 'center', gap = 4 }: RowProps) {
-  const className = `layout-row justify-${justify} items-${items} gap-${gap}`;
-  
+  const className = `layout-row ${justifyMap[justify]} ${itemsMap[items]} ${gapMap[gap]}`;
+
   return <div className={className}>{children}</div>;
 }

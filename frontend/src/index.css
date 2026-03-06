@@ -71,21 +71,6 @@
   .layout-columns-vertical { @apply flex-col; }
   .column-flex { @apply flex-1 min-w-0; }
   .layout-row { @apply flex flex-row w-full; }
-  
-  .justify-start { @apply justify-start; }
-  .justify-center { @apply justify-center; }
-  .justify-end { @apply justify-end; }
-  .justify-between { @apply justify-between; }
-  
-  .items-start { @apply items-start; }
-  .items-center { @apply items-center; }
-  .items-end { @apply items-end; }
-  .items-baseline { @apply items-baseline; }
-  
-  .gap-2 { @apply gap-2; }
-  .gap-4 { @apply gap-4; }
-  .gap-6 { @apply gap-6; }
-  .gap-8 { @apply gap-8; }
 
   /* Container: Cards */
   .card-base { @apply bg-bg-surface border border-border-base rounded-lg p-4 shadow-sm; }
