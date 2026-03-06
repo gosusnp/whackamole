@@ -27,17 +27,20 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
   const [name, setName] = useState(task.name);
   const [description, setDescription] = useState(task.description || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [nameError, setNameError] = useState('');
 
   const handleSave = async () => {
     if (description === (task.description || '') && name === task.name) {
       setIsEditing(false);
+      setNameError('');
       return;
     }
 
     if (!name.trim()) {
-      alert('Task name cannot be empty');
+      setNameError('Task name cannot be empty');
       return;
     }
+    setNameError('');
 
     setIsSaving(true);
     try {
@@ -56,6 +59,7 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
       if (response.ok) {
         onUpdate(task.id, { name, description });
         setIsEditing(false);
+        setNameError('');
       } else {
         console.error('Failed to update task');
       }
@@ -70,6 +74,7 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
     setName(task.name);
     setDescription(task.description || '');
     setIsEditing(false);
+    setNameError('');
   };
 
   // Header: ID and Type at Top Left, Status at Top Right
@@ -93,14 +98,19 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
     <Card title={cardHeader}>
       <div className="flex flex-col gap-4">
         {/* Name Row: Name + Edit Actions */}
-        <Row justify="between" gap={4}>
-          {isEditing ? (
-            <Input value={name} onValueChange={setName} placeholder="Task name" />
-          ) : (
-            <Heading level={3} noMargin>{task.name}</Heading>
-          )}
+        <Row justify="between" items="start" gap={4}>
+          <div className="flex-1 flex flex-col gap-1">
+            {isEditing ? (
+              <>
+                <Input value={name} onValueChange={setName} placeholder="Task name" />
+                {nameError && <Text small muted>{nameError}</Text>}
+              </>
+            ) : (
+              <Heading level={3} noMargin>{task.name}</Heading>
+            )}
+          </div>
           
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex gap-2 flex-shrink-0 pt-1">
             {isEditing ? (
               <>
                 <Button variant="ghost" onClick={handleSave} disabled={isSaving}>
