@@ -63,7 +63,7 @@ export function TaskList({ projectId }: TaskListProps) {
 
   return (
     <div className="space-y-6">
-      <Row justify="between" items="center">
+      <Row justify="between" items="center" className="task-list-header">
         <Heading level={2} noMargin>
           Tasks ({tasks.length})
         </Heading>
