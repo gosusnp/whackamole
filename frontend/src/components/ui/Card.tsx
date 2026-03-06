@@ -7,7 +7,7 @@ import type { ComponentChildren } from 'preact';
 
 interface CardProps {
   children: ComponentChildren;
-  title?: string;
+  title?: ComponentChildren;
   footer?: ComponentChildren;
 }
 
@@ -16,7 +16,7 @@ export function Card({ children, title, footer }: CardProps) {
     <div className="card-base">
       {title && (
         <div className="card-header">
-          <h3 className="card-title">{title}</h3>
+          {typeof title === 'string' ? <h3 className="card-title">{title}</h3> : title}
         </div>
       )}
       <div className="card-content">{children}</div>
