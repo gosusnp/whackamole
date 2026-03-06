@@ -31,7 +31,7 @@ license-check:
 	go tool addlicense -check -l mit -c "Jimmy Ma" -s=only -ignore "frontend/node_modules/**" .
 
 license-fix:
-	go tool addlicense -l mit -c "Jimmy Ma" -s=only -ignore "frontend/node_modules/**".
+	go tool addlicense -l mit -c "Jimmy Ma" -s=only -ignore "frontend/node_modules/**" .
 
 lint:
 	go vet ./...
