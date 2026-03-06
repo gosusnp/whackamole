@@ -34,6 +34,8 @@
   --type-feat: #10b981;
   --type-bug: #ef4444;
 
+  --logo-filter: none;
+
   transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out;
 }
 
@@ -50,6 +52,8 @@
   --accent-blue-hover: #93c5fd;
   --type-feat: #34d399;
   --type-bug: #f87171;
+
+  --logo-filter: invert(1);
 }
 
 @layer components {

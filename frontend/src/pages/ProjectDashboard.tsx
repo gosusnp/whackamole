@@ -100,9 +100,17 @@ export function ProjectDashboard() {
   return (
     <div className="mx-auto max-w-6xl p-8">
       <Row justify="between" items="center" className="mb-8">
-        <Heading level={1} noMargin>
-          whackAmole
-        </Heading>
+        <Row items="center" gap={4}>
+          <img
+            src="/favicon.png"
+            alt=""
+            className="h-8 w-8"
+            style={{ filter: 'var(--logo-filter)' }}
+          />
+          <Heading level={1} noMargin>
+            whackAmole
+          </Heading>
+        </Row>
         <Button variant="ghost" onClick={toggleTheme} aria-label="Toggle theme">
           {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
         </Button>
