@@ -11,17 +11,26 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'ghost';
   disabled?: boolean;
   type?: 'button' | 'submit';
+  'aria-label'?: string;
 }
 
-export function Button({ children, onClick, variant = 'primary', disabled, type = 'button' }: ButtonProps) {
+export function Button({
+  children,
+  onClick,
+  variant = 'primary',
+  disabled,
+  type = 'button',
+  'aria-label': ariaLabel,
+}: ButtonProps) {
   const className = `btn-base btn-${variant}`;
-  
+
   return (
-    <button 
+    <button
       type={type}
-      className={className} 
-      onClick={onClick} 
+      className={className}
+      onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
     >
       {children}
     </button>

@@ -40,9 +40,24 @@ export function ProjectDashboard() {
     return () => controller.abort();
   }, []);
 
-  if (loading) return <div className="p-8"><Text muted>Loading projects...</Text></div>;
-  if (error) return <div className="p-8"><Text muted>{error}</Text></div>;
-  if (projects.length === 0) return <div className="p-8"><Text muted>No projects found.</Text></div>;
+  if (loading)
+    return (
+      <div className="p-8">
+        <Text muted>Loading projects...</Text>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="p-8">
+        <Text muted>{error}</Text>
+      </div>
+    );
+  if (projects.length === 0)
+    return (
+      <div className="p-8">
+        <Text muted>No projects found.</Text>
+      </div>
+    );
 
   const tabItems = projects.map((project) => ({
     id: String(project.id),

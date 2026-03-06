@@ -13,6 +13,7 @@ linters:
       - legacy
       - std-error-handling
     paths:
+      - frontend
       - third_party$
       - builtin$
       - examples$
@@ -20,6 +21,7 @@ formatters:
   exclusions:
     generated: lax
     paths:
+      - frontend
       - third_party$
       - builtin$
       - examples$

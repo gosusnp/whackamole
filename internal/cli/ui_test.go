@@ -41,10 +41,10 @@ func TestUIAPI(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Contains(t, resp.Header.Get("Content-Type"), "text/html")
 
-		resp, err = http.Get(server.URL + "/vite.svg")
+		resp, err = http.Get(server.URL + "/favicon.png")
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.Contains(t, resp.Header.Get("Content-Type"), "image/svg+xml")
+		assert.Contains(t, resp.Header.Get("Content-Type"), "image/png")
 	})
 
 	t.Run("CreateProject", func(t *testing.T) {

@@ -34,16 +34,24 @@ license-fix:
 	go tool addlicense -l mit -c "Jimmy Ma" -s=only -ignore "frontend/node_modules/**" .
 
 lint:
-	go vet ./...
+	go vet $$(go list ./... | grep -v '/frontend')
 	go tool golangci-lint run ./...
 
 pre-commit: fix check
 
+pre-commit-all: pre-commit ui-pre-commit
+
 test:
-	go tool gotestsum --format pkgname-and-test-fails -- -cover ./...
+	go tool gotestsum --format pkgname-and-test-fails -- -cover $$(go list ./... | grep -v '/frontend')
 
 ui-build:
 	make -C frontend build
 
 ui-run:
 	make -C frontend run
+
+ui-pre-commit:
+	make -C frontend pre-commit
+
+ui-test:
+	make -C frontend test

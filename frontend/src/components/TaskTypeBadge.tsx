@@ -31,10 +31,10 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
       setIsOpen(false);
       return;
     }
-    
+
     setIsUpdating(true);
     setIsOpen(false);
-    
+
     try {
       const updatedTask = {
         ...task,
@@ -64,19 +64,12 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
       open={isOpen}
       onOpenChange={setIsOpen}
       trigger={
-        <button 
-          className="btn-ghost"
-          disabled={isUpdating}
-        >
+        <button className="btn-ghost" disabled={isUpdating}>
           {task.type}
         </button>
       }
     >
-      <ToggleGroup
-        value={task.type}
-        onValueChange={handleTypeChange}
-        items={TYPE_OPTIONS}
-      />
+      <ToggleGroup value={task.type} onValueChange={handleTypeChange} items={TYPE_OPTIONS} />
     </Popover>
   );
 }

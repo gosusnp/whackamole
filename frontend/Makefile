@@ -7,6 +7,9 @@ watch:
 build:
 	npm run build
 
+test:
+	npm run test
+
 preview:
 	npm run preview
 
@@ -15,3 +18,5 @@ lint:
 
 fmt:
 	npm run format
+
+pre-commit: fmt lint build test

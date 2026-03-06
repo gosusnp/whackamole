@@ -45,13 +45,15 @@ export function DesignElements() {
                 <Text>Current Value: {toggleValue}</Text>
                 <Popover
                   trigger={
-                    <button className="px-4 py-2 bg-bg-muted border border-border-base rounded text-sm text-text-base">
+                    <button className="bg-bg-muted border-border-base text-text-base rounded border px-4 py-2 text-sm">
                       Open Menu
                     </button>
                   }
                 >
                   <div className="flex flex-col gap-2">
-                    <Text small muted>Select an option:</Text>
+                    <Text small muted>
+                      Select an option:
+                    </Text>
                     <ToggleGroup
                       value={toggleValue}
                       onValueChange={setToggleValue}

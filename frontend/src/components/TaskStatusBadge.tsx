@@ -30,10 +30,10 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
       setIsOpen(false);
       return;
     }
-    
+
     setIsUpdating(true);
     setIsOpen(false); // Close immediately for a smoother UI
-    
+
     try {
       const updatedTask = {
         ...task,
@@ -63,7 +63,7 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
       open={isOpen}
       onOpenChange={setIsOpen}
       trigger={
-        <button 
+        <button
           className={`btn-ghost ${task.status === 'completed' ? '' : 'btn-ghost-active'}`}
           disabled={isUpdating}
         >
@@ -71,11 +71,7 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
         </button>
       }
     >
-      <ToggleGroup
-        value={task.status}
-        onValueChange={handleStatusChange}
-        items={STATUS_OPTIONS}
-      />
+      <ToggleGroup value={task.status} onValueChange={handleStatusChange} items={STATUS_OPTIONS} />
     </Popover>
   );
 }

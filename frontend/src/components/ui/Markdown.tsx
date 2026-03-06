@@ -13,11 +13,7 @@ interface MarkdownProps {
 export function Markdown({ content }: MarkdownProps) {
   return (
     <div className="prose-content">
-      <ReactMarkdown 
-        remarkPlugins={[remarkGfm]}
-      >
-        {content}
-      </ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );
 }

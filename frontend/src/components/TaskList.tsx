@@ -45,10 +45,8 @@ export function TaskList({ projectId }: TaskListProps) {
   }, [projectId]);
 
   const handleUpdate = (taskId: number, updates: Partial<Task>) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.id === taskId ? { ...task, ...updates } : task
-      )
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => (task.id === taskId ? { ...task, ...updates } : task)),
     );
   };
 

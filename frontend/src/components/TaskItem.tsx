@@ -81,14 +81,16 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
   const cardHeader = (
     <Row justify="between">
       <Row gap={2}>
-        <Text muted small>#{task.id}</Text>
-        <TaskTypeBadge 
-          task={task} 
+        <Text muted small>
+          #{task.id}
+        </Text>
+        <TaskTypeBadge
+          task={task}
           onTypeUpdate={(newType) => onUpdate(task.id, { type: newType })}
         />
       </Row>
-      <TaskStatusBadge 
-        task={task} 
+      <TaskStatusBadge
+        task={task}
         onStatusUpdate={(newStatus) => onUpdate(task.id, { status: newStatus })}
       />
     </Row>
@@ -99,29 +101,45 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
       <div className="flex flex-col gap-4">
         {/* Name Row: Name + Edit Actions */}
         <Row justify="between" items="start" gap={4}>
-          <div className="flex-1 flex flex-col gap-1">
+          <div className="flex flex-1 flex-col gap-1">
             {isEditing ? (
               <>
                 <Input value={name} onValueChange={setName} placeholder="Task name" />
-                {nameError && <Text small muted>{nameError}</Text>}
+                {nameError && (
+                  <Text small muted>
+                    {nameError}
+                  </Text>
+                )}
               </>
             ) : (
-              <Heading level={3} noMargin>{task.name}</Heading>
+              <Heading level={3} noMargin>
+                {task.name}
+              </Heading>
             )}
           </div>
-          
-          <div className="flex gap-2 flex-shrink-0 pt-1">
+
+          <div className="flex flex-shrink-0 gap-2 pt-1">
             {isEditing ? (
               <>
-                <Button variant="ghost" onClick={handleSave} disabled={isSaving}>
+                <Button
+                  variant="ghost"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  aria-label="Save task"
+                >
                   <Save size={14} />
                 </Button>
-                <Button variant="ghost" onClick={handleCancel} disabled={isSaving}>
+                <Button
+                  variant="ghost"
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                  aria-label="Cancel edit"
+                >
                   <X size={14} />
                 </Button>
               </>
             ) : (
-              <Button variant="ghost" onClick={() => setIsEditing(true)}>
+              <Button variant="ghost" onClick={() => setIsEditing(true)} aria-label="Edit task">
                 <Edit2 size={14} />
               </Button>
             )}
@@ -131,17 +149,15 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
         {/* Description Row */}
         <div>
           {isEditing ? (
-            <TextArea 
-              value={description} 
-              onValueChange={setDescription} 
+            <TextArea
+              value={description}
+              onValueChange={setDescription}
               placeholder="Add description..."
             />
+          ) : task.description ? (
+            <Markdown content={task.description} />
           ) : (
-            task.description ? (
-              <Markdown content={task.description} />
-            ) : (
-              <Text muted>No description provided.</Text>
-            )
+            <Text muted>No description provided.</Text>
           )}
         </div>
       </div>

@@ -15,7 +15,14 @@ interface PopoverProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function Popover({ trigger, children, side = 'bottom', align = 'center', open, onOpenChange }: PopoverProps) {
+export function Popover({
+  trigger,
+  children,
+  side = 'bottom',
+  align = 'center',
+  open,
+  onOpenChange,
+}: PopoverProps) {
   return (
     <RadixPopover.Root open={open} onOpenChange={onOpenChange}>
       <RadixPopover.Trigger asChild>{trigger}</RadixPopover.Trigger>
