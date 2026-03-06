@@ -39,6 +39,14 @@ jobs:
         run: npm ci
         working-directory: frontend
 
+      - name: Frontend lint
+        run: npm run lint
+        working-directory: frontend
+
+      - name: Frontend tests
+        run: npm run test
+        working-directory: frontend
+
       - name: Format check
         run: make license-check fmt-check
 
