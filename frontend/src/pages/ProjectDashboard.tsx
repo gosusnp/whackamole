@@ -40,7 +40,7 @@ export function ProjectDashboard() {
 
   return (
     <div className="p-8">
-      <Heading level={1}>whackAMole</Heading>
+      <Heading level={1}>whackAmole</Heading>
       <Tabs items={tabItems} />
     </div>
   );

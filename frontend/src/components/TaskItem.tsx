@@ -8,6 +8,7 @@ import { Card } from './ui/Card';
 import { Text } from './ui/Text';
 import { Button } from './ui/Button';
 import { TextArea } from './ui/TextArea';
+import { Input } from './ui/Input';
 import { Markdown } from './ui/Markdown';
 import { TaskStatusBadge } from './TaskStatusBadge';
 import { TaskTypeBadge } from './TaskTypeBadge';
@@ -29,12 +30,18 @@ interface TaskItemProps {
 
 export function TaskItem({ task, onUpdate }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(task.name);
   const [description, setDescription] = useState(task.description || '');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
-    if (description === (task.description || '')) {
+    if (description === (task.description || '') && name === task.name) {
       setIsEditing(false);
+      return;
+    }
+
+    if (!name.trim()) {
+      alert('Task name cannot be empty');
       return;
     }
 
@@ -42,6 +49,7 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
     try {
       const updatedTask = {
         ...task,
+        name: name,
         description: description,
       };
 
@@ -52,27 +60,32 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
       });
 
       if (response.ok) {
-        onUpdate(task.id, { description });
+        onUpdate(task.id, { name, description });
         setIsEditing(false);
       } else {
-        console.error('Failed to update task description');
+        console.error('Failed to update task');
       }
     } catch (err) {
-      console.error('Error updating task description:', err);
+      console.error('Error updating task:', err);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
+    setName(task.name);
     setDescription(task.description || '');
     setIsEditing(false);
   };
 
   const cardTitle = (
-    <div className="flex w-full justify-between items-center">
-      <h3 className="card-title">{task.name}</h3>
-      <div className="flex gap-2">
+    <div className="flex w-full justify-between items-center gap-4">
+      {isEditing ? (
+        <Input value={name} onValueChange={setName} placeholder="Task name" />
+      ) : (
+        <h3 className="card-title">{task.name}</h3>
+      )}
+      <div className="flex gap-2 flex-shrink-0">
         {isEditing ? (
           <>
             <Button variant="ghost" onClick={handleSave} disabled={isSaving}>

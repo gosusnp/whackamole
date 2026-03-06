@@ -58,6 +58,9 @@
   }
 
   /* Form Elements */
+  .input-base {
+    @apply w-full bg-bg-muted border border-border-base rounded-md px-3 py-2 text-sm text-text-base focus:outline-none focus:border-brand-primary transition-colors;
+  }
   .textarea-base {
     @apply w-full bg-bg-muted border border-border-base rounded-md p-3 text-sm text-text-base focus:outline-none focus:border-brand-primary transition-colors resize-none;
   }
@@ -69,8 +72,8 @@
 
   /* Container: Cards */
   .card-base { @apply bg-bg-surface border border-border-base rounded-lg p-4 shadow-sm; }
-  .card-header { @apply mb-4 pb-2 border-b border-border-base flex justify-between items-center; }
-  .card-title { @apply text-lg font-semibold text-text-base; }
+  .card-header { @apply mb-4 pb-2 border-b border-border-base flex justify-between items-center gap-4; }
+  .card-title { @apply text-lg font-semibold text-text-base truncate; }
   .card-footer { @apply mt-4 pt-2 border-t border-border-base; }
 
   /* Interaction: Tabs */
