@@ -22,6 +22,7 @@
   .heading-level-1 { @apply text-3xl font-bold mb-8 text-text-base; }
   .heading-level-2 { @apply text-xl font-semibold mb-4 text-text-base; }
   .heading-level-3 { @apply text-lg font-medium mb-2 text-text-base; }
+  .heading-no-margin { @apply mb-0; }
   
   .text-base { @apply text-sm text-text-base leading-relaxed; }
   .text-muted { @apply text-text-muted; }
@@ -65,10 +66,26 @@
     @apply w-full bg-bg-muted border border-border-base rounded-md p-3 text-sm text-text-base focus:outline-none focus:border-brand-primary transition-colors resize-none;
   }
 
-  /* Layout: Columns */
+  /* Layout: Columns/Rows */
   .layout-columns { @apply flex flex-row gap-4 w-full; }
   .layout-columns-vertical { @apply flex-col; }
   .column-flex { @apply flex-1 min-w-0; }
+  .layout-row { @apply flex flex-row w-full; }
+  
+  .justify-start { @apply justify-start; }
+  .justify-center { @apply justify-center; }
+  .justify-end { @apply justify-end; }
+  .justify-between { @apply justify-between; }
+  
+  .items-start { @apply items-start; }
+  .items-center { @apply items-center; }
+  .items-end { @apply items-end; }
+  .items-baseline { @apply items-baseline; }
+  
+  .gap-2 { @apply gap-2; }
+  .gap-4 { @apply gap-4; }
+  .gap-6 { @apply gap-6; }
+  .gap-8 { @apply gap-8; }
 
   /* Container: Cards */
   .card-base { @apply bg-bg-surface border border-border-base rounded-lg p-4 shadow-sm; }
