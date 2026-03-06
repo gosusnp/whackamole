@@ -28,7 +28,10 @@ install:
 	go install -ldflags '$(LDFLAGS)' ./cmd/whack
 
 license-check:
-	go tool addlicense -check -l mit -c "Jimmy Ma" -s=only .
+	go tool addlicense -check -l mit -c "Jimmy Ma" -s=only -ignore "frontend/node_modules/**" .
+
+license-fix:
+	go tool addlicense -l mit -c "Jimmy Ma" -s=only -ignore "frontend/node_modules/**".
 
 lint:
 	go vet ./...
@@ -39,5 +42,5 @@ pre-commit: fix check
 test:
 	go tool gotestsum --format pkgname-and-test-fails -- -cover ./...
 
-license-fix:
-	go tool addlicense -l mit -c "Jimmy Ma" -s=only .
+ui-run:
+	make -C frontend run
