@@ -15,15 +15,7 @@ import { Markdown } from './ui/Markdown';
 import { TaskStatusBadge } from './TaskStatusBadge';
 import { TaskTypeBadge } from './TaskTypeBadge';
 import { Edit2, Save, X } from 'lucide-preact';
-
-interface Task {
-  id: number;
-  projectId: number;
-  name: string;
-  description: string;
-  type: string;
-  status: string;
-}
+import type { Task } from '../types';
 
 interface TaskItemProps {
   task: Task;

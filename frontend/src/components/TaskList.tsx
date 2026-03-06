@@ -7,15 +7,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { Columns, Column } from './ui/Columns';
 import { Text } from './ui/Text';
 import { TaskItem } from './TaskItem';
-
-interface Task {
-  id: number;
-  projectId: number;
-  name: string;
-  description: string;
-  type: string;
-  status: string;
-}
+import type { Task } from '../types';
 
 interface TaskListProps {
   projectId: number;

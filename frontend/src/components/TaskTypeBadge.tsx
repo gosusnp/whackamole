@@ -6,15 +6,7 @@
 import { useState } from 'preact/hooks';
 import { Popover } from './ui/Popover';
 import { ToggleGroup } from './ui/ToggleGroup';
-
-interface Task {
-  id: number;
-  projectId: number;
-  name: string;
-  description: string;
-  type: string;
-  status: string;
-}
+import type { Task } from '../types';
 
 interface TaskTypeBadgeProps {
   task: Task;
