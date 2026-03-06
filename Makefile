@@ -42,5 +42,8 @@ pre-commit: fix check
 test:
 	go tool gotestsum --format pkgname-and-test-fails -- -cover ./...
 
+ui-build:
+	make -C frontend build
+
 ui-run:
 	make -C frontend run

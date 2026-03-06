@@ -35,6 +35,18 @@ func TestUIAPI(t *testing.T) {
 	server := httptest.NewServer(handler)
 	defer server.Close()
 
+	t.Run("StaticFiles", func(t *testing.T) {
+		resp, err := http.Get(server.URL + "/")
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Contains(t, resp.Header.Get("Content-Type"), "text/html")
+
+		resp, err = http.Get(server.URL + "/vite.svg")
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Contains(t, resp.Header.Get("Content-Type"), "image/svg+xml")
+	})
+
 	t.Run("CreateProject", func(t *testing.T) {
 		p := types.Project{Name: "API Project", Key: "api-p"}
 		body, _ := json.Marshal(p)

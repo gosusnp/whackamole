@@ -10,6 +10,7 @@
 *.dll
 *.so
 *.dylib
+internal/cli/static
 
 # Test binary, built with `go test -c`
 *.test

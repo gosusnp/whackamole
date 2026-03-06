@@ -12,4 +12,8 @@ export default defineConfig({
       'react/jsx-runtime': 'preact/jsx-runtime',
     },
   },
+  build: {
+    outDir: '../internal/cli/static',
+    emptyOutDir: true,
+  },
 })
