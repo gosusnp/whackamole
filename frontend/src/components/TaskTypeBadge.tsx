@@ -6,11 +6,11 @@
 import { useState } from 'preact/hooks';
 import { Popover } from './ui/Popover';
 import { ToggleGroup } from './ui/ToggleGroup';
-import type { Task } from '../types';
+import type { Task, TaskType } from '../types';
 
 interface TaskTypeBadgeProps {
   task: Task;
-  onTypeUpdate: (newType: string) => void;
+  onTypeUpdate: (newType: TaskType) => void;
 }
 
 const TYPE_OPTIONS = [
@@ -37,7 +37,7 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
 
     try {
       const updates = {
-        type: newType,
+        type: newType as TaskType,
       };
 
       const response = await fetch(`/api/tasks/${task.id}`, {
@@ -47,7 +47,7 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
       });
 
       if (response.ok) {
-        onTypeUpdate(newType);
+        onTypeUpdate(newType as TaskType);
       } else {
         console.error('Failed to update task type');
       }

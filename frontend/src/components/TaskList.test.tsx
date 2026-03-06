@@ -12,6 +12,20 @@ vi.mock('./TaskItem', () => ({
   TaskItem: ({ task }: { task: Task }) => <div data-testid="task-item">{task.name}</div>,
 }));
 
+vi.mock('./CreateTaskDialog', () => ({
+  CreateTaskDialog: ({
+    projectId,
+    onTaskCreated,
+  }: {
+    projectId: number;
+    onTaskCreated: () => void;
+  }) => (
+    <button data-testid="create-task-trigger" onClick={onTaskCreated}>
+      Create Task for {projectId}
+    </button>
+  ),
+}));
+
 const mockTasks: Task[] = [
   {
     id: 1,
@@ -123,6 +137,29 @@ describe('TaskList', () => {
         '/api/tasks?projectId=2',
         expect.objectContaining({ signal: expect.any(AbortSignal) }),
       );
+    });
+  });
+
+  it('refetches when onTaskCreated is called', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockTasks),
+    });
+
+    render(<TaskList projectId={1} />);
+    await waitFor(() => screen.getByTestId('create-task-trigger'));
+
+    mockFetch.mockClear();
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([...mockTasks, { ...mockTasks[0], id: 3, name: 'Third' }]),
+    });
+
+    screen.getByTestId('create-task-trigger').click();
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/tasks?projectId=1', { signal: undefined });
+      expect(screen.getByText('Tasks (3)')).toBeInTheDocument();
     });
   });
 });

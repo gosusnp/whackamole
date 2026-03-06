@@ -6,7 +6,10 @@
 import { useState, useEffect } from 'preact/hooks';
 import { Columns, Column } from './ui/Columns';
 import { Text } from './ui/Text';
+import { Row } from './ui/Row';
+import { Heading } from './ui/Heading';
 import { TaskItem } from './TaskItem';
+import { CreateTaskDialog } from './CreateTaskDialog';
 import type { Task } from '../types';
 
 interface TaskListProps {
@@ -19,7 +22,8 @@ export function TaskList({ projectId }: TaskListProps) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchTasks = (signal?: AbortSignal) => {
-    setLoading(true);
+    // We only show loading on initial fetch
+    if (tasks.length === 0) setLoading(true);
     setError(null);
     fetch(`/api/tasks?projectId=${projectId}`, { signal })
       .then((res) => {
@@ -50,17 +54,33 @@ export function TaskList({ projectId }: TaskListProps) {
     );
   };
 
+  const handleTaskCreated = () => {
+    fetchTasks();
+  };
+
   if (loading) return <Text muted>Loading tasks...</Text>;
   if (error) return <Text muted>{error}</Text>;
-  if (tasks.length === 0) return <Text muted>No tasks found.</Text>;
 
   return (
-    <Columns vertical>
-      {tasks.map((task) => (
-        <Column key={task.id}>
-          <TaskItem task={task} onUpdate={handleUpdate} />
-        </Column>
-      ))}
-    </Columns>
+    <div className="space-y-6">
+      <Row justify="between" items="center">
+        <Heading level={2} noMargin>
+          Tasks ({tasks.length})
+        </Heading>
+        <CreateTaskDialog projectId={projectId} onTaskCreated={handleTaskCreated} />
+      </Row>
+
+      {tasks.length === 0 ? (
+        <Text muted>No tasks found.</Text>
+      ) : (
+        <Columns vertical>
+          {tasks.map((task) => (
+            <Column key={task.id}>
+              <TaskItem task={task} onUpdate={handleUpdate} />
+            </Column>
+          ))}
+        </Columns>
+      )}
+    </div>
   );
 }

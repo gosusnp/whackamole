@@ -6,11 +6,11 @@
 import { useState } from 'preact/hooks';
 import { Popover } from './ui/Popover';
 import { ToggleGroup } from './ui/ToggleGroup';
-import type { Task } from '../types';
+import type { Task, TaskStatus } from '../types';
 
 interface TaskStatusBadgeProps {
   task: Task;
-  onStatusUpdate: (newStatus: string) => void;
+  onStatusUpdate: (newStatus: TaskStatus) => void;
 }
 
 const STATUS_OPTIONS = [
@@ -36,7 +36,7 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
 
     try {
       const updates = {
-        status: newStatus,
+        status: newStatus as TaskStatus,
       };
 
       const response = await fetch(`/api/tasks/${task.id}`, {
@@ -46,7 +46,7 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
       });
 
       if (response.ok) {
-        onStatusUpdate(newStatus);
+        onStatusUpdate(newStatus as TaskStatus);
       } else {
         console.error('Failed to update task status');
       }
