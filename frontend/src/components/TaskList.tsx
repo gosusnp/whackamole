@@ -7,6 +7,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { Card } from '../components/ui/Card';
 import { Columns, Column } from '../components/ui/Columns';
 import { Text } from '../components/ui/Text';
+import { Markdown } from '../components/ui/Markdown';
 import { TaskStatusBadge } from './TaskStatusBadge';
 import { TaskTypeBadge } from './TaskTypeBadge';
 
@@ -66,7 +67,7 @@ export function TaskList({ projectId }: TaskListProps) {
         <Column key={task.id}>
           <Card title={task.name}>
             <div className="flex flex-col gap-3">
-              <Text>{task.description}</Text>
+              <Markdown content={task.description} />
               <div className="flex items-center gap-3">
                 <TaskTypeBadge 
                   task={task} 
