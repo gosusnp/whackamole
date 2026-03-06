@@ -14,17 +14,29 @@ vi.mock('../components/TaskList', () => ({
 }));
 
 vi.mock('../components/ui/Tabs', () => ({
-  Tabs: ({ items }: { items: { id: string; label: string; content: unknown }[] }) => (
+  Tabs: ({
+    items,
+    onValueChange,
+    defaultValue,
+  }: {
+    items: { id: string; label: string; content: unknown }[];
+    onValueChange?: (id: string) => void;
+    defaultValue?: string;
+  }) => (
     <div>
       {items.map((item) => (
-        <button key={item.id} role="tab">
+        <button
+          key={item.id}
+          role="tab"
+          onClick={() => onValueChange?.(item.id)}
+          aria-selected={defaultValue === item.id}
+        >
           {item.label}
         </button>
       ))}
     </div>
   ),
 }));
-
 const mockProjects = [
   { id: 1, name: 'Alpha', key: 'alpha' },
   { id: 2, name: 'Beta', key: 'beta' },
@@ -95,5 +107,39 @@ describe('ProjectDashboard', () => {
     });
 
     expect(screen.getByText(/failed to load/i)).toBeInTheDocument();
+  });
+
+  it('initializes selected project from localStorage', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockProjects),
+    });
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key) => {
+      if (key === 'whack-last-project-id') return '2';
+      return null;
+    });
+
+    render(<ProjectDashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: 'Beta' })).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+
+  it('saves selected project to localStorage on change', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockProjects),
+    });
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+
+    render(<ProjectDashboard />);
+
+    await waitFor(() => screen.getByRole('tab', { name: 'Beta' }));
+    act(() => {
+      screen.getByRole('tab', { name: 'Beta' }).click();
+    });
+
+    expect(setItemSpy).toHaveBeenCalledWith('whack-last-project-id', '2');
   });
 });

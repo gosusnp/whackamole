@@ -15,13 +15,20 @@ interface TabItem {
 interface TabsProps {
   items: TabItem[];
   defaultValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
 }
 
-export function Tabs({ items, defaultValue }: TabsProps) {
+export function Tabs({ items, defaultValue, value, onValueChange }: TabsProps) {
   const defaultTab = defaultValue || items[0]?.id;
 
   return (
-    <RadixTabs.Root className="tabs-root" defaultValue={defaultTab}>
+    <RadixTabs.Root
+      className="tabs-root"
+      defaultValue={defaultTab}
+      value={value}
+      onValueChange={onValueChange}
+    >
       <RadixTabs.List className="tabs-list">
         {items.map((item) => (
           <RadixTabs.Trigger key={item.id} value={item.id} className="tabs-trigger">

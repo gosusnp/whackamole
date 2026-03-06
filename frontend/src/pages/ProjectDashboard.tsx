@@ -23,6 +23,9 @@ export function ProjectDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(
+    localStorage.getItem('whack-last-project-id') || undefined,
+  );
 
   // Initialize theme
   useEffect(() => {
@@ -39,6 +42,11 @@ export function ProjectDashboard() {
       document.documentElement.classList.remove('dark');
     }
   }, []);
+
+  const handleTabChange = (id: string) => {
+    setSelectedProjectId(id);
+    localStorage.setItem('whack-last-project-id', id);
+  };
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -115,7 +123,7 @@ export function ProjectDashboard() {
           {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
         </Button>
       </Row>
-      <Tabs items={tabItems} />
+      <Tabs items={tabItems} defaultValue={selectedProjectId} onValueChange={handleTabChange} />
     </div>
   );
 }
