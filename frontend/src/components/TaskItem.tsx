@@ -80,7 +80,7 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
   const cardHeader = (
     <Row justify="between">
       <Row gap={2}>
-        <Text muted small>
+        <Text muted small className="text-mono">
           #{task.id}
         </Text>
         <TaskTypeBadge

@@ -9,12 +9,15 @@ interface TextProps {
   children: ComponentChildren;
   muted?: boolean;
   small?: boolean;
+  className?: string;
 }
 
-export function Text({ children, muted, small }: TextProps) {
-  let className = 'text-base';
-  if (muted) className += ' text-muted';
-  if (small) className += ' text-small';
+export function Text({ children, muted, small, className: extraClassName }: TextProps) {
+  let baseClass = 'text-base';
+  if (muted) baseClass += ' text-muted';
+  if (small) baseClass += ' text-small';
 
-  return <p className={className}>{children}</p>;
+  const fullClassName = extraClassName ? `${baseClass} ${extraClassName}` : baseClass;
+
+  return <p className={fullClassName}>{children}</p>;
 }

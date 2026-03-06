@@ -12,6 +12,7 @@ interface ButtonProps {
   disabled?: boolean;
   type?: 'button' | 'submit';
   'aria-label'?: string;
+  className?: string;
 }
 
 export function Button({
@@ -21,13 +22,15 @@ export function Button({
   disabled,
   type = 'button',
   'aria-label': ariaLabel,
+  className: extraClassName,
 }: ButtonProps) {
-  const className = `btn-base btn-${variant}`;
+  const baseClassName = `btn-base btn-${variant}`;
+  const fullClassName = extraClassName ? `${baseClassName} ${extraClassName}` : baseClassName;
 
   return (
     <button
       type={type}
-      className={className}
+      className={fullClassName}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}

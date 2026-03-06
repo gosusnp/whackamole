@@ -8,6 +8,9 @@ import { Tabs } from '../components/ui/Tabs';
 import { TaskList } from '../components/TaskList';
 import { Heading } from '../components/ui/Heading';
 import { Text } from '../components/ui/Text';
+import { Row } from '../components/ui/Row';
+import { Button } from '../components/ui/Button';
+import { Sun, Moon } from 'lucide-preact';
 
 interface Project {
   id: number;
@@ -19,6 +22,35 @@ export function ProjectDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  // Initialize theme
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('whack-theme') as 'light' | 'dark' | null;
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+    const initialTheme = savedTheme || systemTheme;
+
+    setTheme(initialTheme);
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('whack-theme', newTheme);
+
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -66,8 +98,15 @@ export function ProjectDashboard() {
   }));
 
   return (
-    <div className="p-8">
-      <Heading level={1}>whackAmole</Heading>
+    <div className="mx-auto max-w-6xl p-8">
+      <Row justify="between" items="center" className="mb-8">
+        <Heading level={1} noMargin>
+          whackAmole
+        </Heading>
+        <Button variant="ghost" onClick={toggleTheme} aria-label="Toggle theme">
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+        </Button>
+      </Row>
       <Tabs items={tabItems} />
     </div>
   );

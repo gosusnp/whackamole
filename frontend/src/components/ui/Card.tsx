@@ -9,11 +9,15 @@ interface CardProps {
   children: ComponentChildren;
   title?: ComponentChildren;
   footer?: ComponentChildren;
+  className?: string;
 }
 
-export function Card({ children, title, footer }: CardProps) {
+export function Card({ children, title, footer, className: extraClassName }: CardProps) {
+  const baseClassName = 'card-base';
+  const fullClassName = extraClassName ? `${baseClassName} ${extraClassName}` : baseClassName;
+
   return (
-    <div className="card-base">
+    <div className={fullClassName}>
       {title && (
         <div className="card-header">
           {typeof title === 'string' ? <h3 className="card-title">{title}</h3> : title}

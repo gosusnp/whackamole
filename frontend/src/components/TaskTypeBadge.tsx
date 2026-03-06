@@ -63,7 +63,10 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
       open={isOpen}
       onOpenChange={setIsOpen}
       trigger={
-        <button className="btn-ghost" disabled={isUpdating}>
+        <button
+          className={`btn-ghost ${task.type === 'feat' ? 'badge-feat' : task.type === 'bug' ? 'badge-bug' : ''}`}
+          disabled={isUpdating}
+        >
           {task.type}
         </button>
       }
