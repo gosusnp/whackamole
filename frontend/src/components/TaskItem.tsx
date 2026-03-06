@@ -80,13 +80,16 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
     setIsEditing(false);
   };
 
-  // Header: Type at Top Left, Status at Top Right
+  // Header: ID and Type at Top Left, Status at Top Right
   const cardHeader = (
     <Row justify="between">
-      <TaskTypeBadge 
-        task={task} 
-        onTypeUpdate={(newType) => onUpdate(task.id, { type: newType })}
-      />
+      <Row gap={2}>
+        <Text muted small>#{task.id}</Text>
+        <TaskTypeBadge 
+          task={task} 
+          onTypeUpdate={(newType) => onUpdate(task.id, { type: newType })}
+        />
+      </Row>
       <TaskStatusBadge 
         task={task} 
         onStatusUpdate={(newStatus) => onUpdate(task.id, { status: newStatus })}
