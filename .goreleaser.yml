@@ -20,6 +20,7 @@ builds:
   - id: whack
     binary: whack
     main: ./cmd/whack/main.go
+    trimpath: true
     env:
       - CGO_ENABLED=0
     goos:

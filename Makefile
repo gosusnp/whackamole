@@ -3,7 +3,7 @@ COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
 LDFLAGS = -X "github.com/gosusnp/whackamole/internal.Version=$(VERSION)" -X "github.com/gosusnp/whackamole/internal.Commit=$(COMMIT)"
 
 build: ui-build
-	go build -ldflags '$(LDFLAGS)' -o whack ./cmd/whack
+	go build -trimpath -ldflags '$(LDFLAGS)' -o whack ./cmd/whack
 
 check: lint test
 
@@ -25,7 +25,7 @@ fmt-check:
 	fi
 
 install: ui-build
-	go install -ldflags '$(LDFLAGS)' ./cmd/whack
+	go install -trimpath -ldflags '$(LDFLAGS)' ./cmd/whack
 
 license-check:
 	go tool addlicense -check -l mit -c "Jimmy Ma" -s=only -ignore "frontend/node_modules/**" .
