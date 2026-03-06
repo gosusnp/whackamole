@@ -16,15 +16,25 @@ interface TaskListProps {
 export function TaskList({ projectId }: TaskListProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchTasks = () => {
+    setLoading(true);
+    setError(null);
     fetch(`/api/tasks?projectId=${projectId}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch tasks');
+        return res.json();
+      })
       .then((data) => {
         setTasks(data || []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error('Error fetching tasks:', err);
+        setError('Failed to load tasks. Please refresh.');
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -40,6 +50,7 @@ export function TaskList({ projectId }: TaskListProps) {
   };
 
   if (loading) return <Text muted>Loading tasks...</Text>;
+  if (error) return <Text muted>{error}</Text>;
   if (tasks.length === 0) return <Text muted>No tasks found.</Text>;
 
   return (
