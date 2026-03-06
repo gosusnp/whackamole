@@ -1,3 +1,8 @@
+/**
+ * Copyright 2026 Jimmy Ma
+ * SPDX-License-Identifier: MIT
+ */
+
 import type { ComponentChildren } from 'preact';
 
 interface CardProps {

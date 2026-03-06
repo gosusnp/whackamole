@@ -1,3 +1,8 @@
+/**
+ * Copyright 2026 Jimmy Ma
+ * SPDX-License-Identifier: MIT
+ */
+
 import { Card } from '../components/ui/Card';
 import { Columns, Column } from '../components/ui/Columns';
 import { Tabs } from '../components/ui/Tabs';

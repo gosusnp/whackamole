@@ -52,7 +52,16 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 
 	mux := http.NewServeMux()
 
-	// API: Projects
+	registerProjectHandlers(mux, database)
+	registerTaskHandlers(mux, database)
+
+	// Static File Server
+	mux.Handle("/", http.FileServer(http.FS(sub)))
+
+	return mux, nil
+}
+
+func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 	mux.HandleFunc("GET /api/projects", func(w http.ResponseWriter, r *http.Request) {
 		store := db.NewProjectStore(database)
 		projects, err := store.List()
@@ -61,7 +70,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(projects)
+		if err := json.NewEncoder(w).Encode(projects); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("POST /api/projects", func(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +89,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(project)
+		if err := json.NewEncoder(w).Encode(project); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("GET /api/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +108,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(project)
+		if err := json.NewEncoder(w).Encode(project); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("PUT /api/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -117,7 +132,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(project)
+		if err := json.NewEncoder(w).Encode(project); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("DELETE /api/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -134,8 +151,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 		}
 		w.WriteHeader(http.StatusNoContent)
 	})
+}
 
-	// API: Tasks
+func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 	mux.HandleFunc("GET /api/tasks", func(w http.ResponseWriter, r *http.Request) {
 		projectIDStr := r.URL.Query().Get("projectId")
 		if projectIDStr == "" {
@@ -154,7 +172,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(tasks)
+		if err := json.NewEncoder(w).Encode(tasks); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("POST /api/tasks", func(w http.ResponseWriter, r *http.Request) {
@@ -171,7 +191,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(task)
+		if err := json.NewEncoder(w).Encode(task); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("GET /api/tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -188,7 +210,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(task)
+		if err := json.NewEncoder(w).Encode(task); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("PUT /api/tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -210,7 +234,9 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(task)
+		if err := json.NewEncoder(w).Encode(task); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("DELETE /api/tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -227,11 +253,6 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 		}
 		w.WriteHeader(http.StatusNoContent)
 	})
-
-	// Static File Server
-	mux.Handle("/", http.FileServer(http.FS(sub)))
-
-	return mux, nil
 }
 
 func init() {

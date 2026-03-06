@@ -1,3 +1,8 @@
+/**
+ * Copyright 2026 Jimmy Ma
+ * SPDX-License-Identifier: MIT
+ */
+
 import { useState, useEffect } from 'preact/hooks';
 import { Tabs } from '../components/ui/Tabs';
 import { TaskList } from '../components/TaskList';

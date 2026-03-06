@@ -1,3 +1,8 @@
+/**
+ * Copyright 2026 Jimmy Ma
+ * SPDX-License-Identifier: MIT
+ */
+
 import { LocationProvider, Router, Route } from 'preact-iso';
 import { ProjectDashboard } from './pages/ProjectDashboard';
 import { DesignElements } from './pages/DesignElements';
