@@ -5,6 +5,7 @@ This file provides context and instructions for AI agents working on the `whacka
 ## Core Documentation
 - @README.md: Installation, usage, and `Makefile` commands.
 - @docs/architecture.md: High-level design, data flow, and "Fat Store" pattern.
+- @docs/frontend.md: Frontend architecture, component conventions, API integration, and build setup.
 
 ## Architectural Mandates
 - **Fat Store Pattern**: All data validation and business logic must reside in `internal/db/`. Do not perform validation in the CLI layer.
@@ -16,7 +17,7 @@ This file provides context and instructions for AI agents working on the `whacka
 
 ## Development Workflow
 - **Local Testing**: Use `./whack-dev` to run the CLI without installing.
-- **Testing**: 
+- **Testing**:
     - Use `testify/suite` for store tests (see `internal/db/projects_test.go`).
     - Test CLI commands by capturing output and using temporary databases (see `internal/cli/project_test.go`).
 - **Formatting**: Run `make fix` before submitting changes.
