@@ -21,7 +21,8 @@ export function ProjectDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/projects')
+    const controller = new AbortController();
+    fetch('/api/projects', { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch projects');
         return res.json();
@@ -31,10 +32,12 @@ export function ProjectDashboard() {
         setLoading(false);
       })
       .catch((err) => {
+        if (err.name === 'AbortError') return;
         console.error('Error fetching projects:', err);
         setError('Failed to load projects. Please refresh.');
         setLoading(false);
       });
+    return () => controller.abort();
   }, []);
 
   if (loading) return <div className="p-8"><Text muted>Loading projects...</Text></div>;

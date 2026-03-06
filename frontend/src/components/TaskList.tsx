@@ -18,10 +18,10 @@ export function TaskList({ projectId }: TaskListProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTasks = () => {
+  const fetchTasks = (signal?: AbortSignal) => {
     setLoading(true);
     setError(null);
-    fetch(`/api/tasks?projectId=${projectId}`)
+    fetch(`/api/tasks?projectId=${projectId}`, { signal })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch tasks');
         return res.json();
@@ -31,6 +31,7 @@ export function TaskList({ projectId }: TaskListProps) {
         setLoading(false);
       })
       .catch((err) => {
+        if (err.name === 'AbortError') return;
         console.error('Error fetching tasks:', err);
         setError('Failed to load tasks. Please refresh.');
         setLoading(false);
@@ -38,7 +39,9 @@ export function TaskList({ projectId }: TaskListProps) {
   };
 
   useEffect(() => {
-    fetchTasks();
+    const controller = new AbortController();
+    fetchTasks(controller.signal);
+    return () => controller.abort();
   }, [projectId]);
 
   const handleUpdate = (taskId: number, updates: Partial<Task>) => {
