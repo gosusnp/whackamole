@@ -10,8 +10,8 @@ project_name: whack
 
 before:
   hooks:
-    - cd frontend && npm ci
-    - cd frontend && npm run build
+    - npm ci --prefix frontend
+    - npm run build --prefix frontend
     - go mod tidy
 
 builds:
@@ -31,7 +31,8 @@ builds:
       - -s -w -X github.com/gosusnp/whackamole/internal.Version={{.Version}} -X github.com/gosusnp/whackamole/internal.Commit={{.ShortCommit}}
 
 archives:
-  - format: tar.gz
+  - formats:
+      - tar.gz
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -41,7 +42,8 @@ archives:
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
 
 changelog:
   sort: asc
@@ -54,4 +56,4 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
