@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useCallback } from 'preact/hooks';
 import { Columns, Column } from './ui/Columns';
 import { Text } from './ui/Text';
 import { Row } from './ui/Row';
@@ -48,15 +48,15 @@ export function TaskList({ projectId }: TaskListProps) {
     return () => controller.abort();
   }, [projectId]);
 
-  const handleUpdate = (taskId: number, updates: Partial<Task>) => {
+  const handleUpdate = useCallback((taskId: number, updates: Partial<Task>) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) => (task.id === taskId ? { ...task, ...updates } : task)),
     );
-  };
+  }, []);
 
-  const handleDelete = (taskId: number) => {
+  const handleDelete = useCallback((taskId: number) => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-  };
+  }, []);
 
   const handleTaskCreated = () => {
     fetchTasks();

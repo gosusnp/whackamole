@@ -4,21 +4,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/preact';
+import { render, screen, waitFor, fireEvent } from '@testing-library/preact';
 import { TaskList } from './TaskList';
 import type { Task } from '../types';
 
-vi.mock('./TaskItem', () => ({
-  TaskItem: ({ task, onDelete }: { task: Task; onDelete: (id: number) => void }) => (
-    <div data-testid="task-item">
-      {task.name}
-      <button data-testid={`delete-task-${task.id}`} onClick={() => onDelete(task.id)}>
-        Delete
-      </button>
-    </div>
-  ),
-}));
-
+// Use standard mocks for unit tests
 vi.mock('./CreateTaskDialog', () => ({
   CreateTaskDialog: ({
     projectId,
@@ -31,6 +21,13 @@ vi.mock('./CreateTaskDialog', () => ({
       Create Task for {projectId}
     </button>
   ),
+}));
+
+// Partially mock child components to allow TaskItem to be real in integration tests
+vi.mock('./TaskStatusBadge', () => ({ TaskStatusBadge: () => <div /> }));
+vi.mock('./TaskTypeBadge', () => ({ TaskTypeBadge: () => <div /> }));
+vi.mock('./ui/Markdown', () => ({
+  Markdown: ({ content }: { content: string }) => <div>{content}</div>,
 }));
 
 const mockTasks: Task[] = [
@@ -61,6 +58,7 @@ describe('TaskList', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it('shows loading state initially', () => {
@@ -78,7 +76,6 @@ describe('TaskList', () => {
     render(<TaskList projectId={1} />);
 
     await waitFor(() => {
-      expect(screen.getAllByTestId('task-item')).toHaveLength(2);
       expect(screen.getByText('First task')).toBeInTheDocument();
       expect(screen.getByText('Second task')).toBeInTheDocument();
     });
@@ -136,7 +133,7 @@ describe('TaskList', () => {
     });
 
     const { rerender } = render(<TaskList projectId={1} />);
-    await screen.findByText('No tasks found.');
+    await waitFor(() => screen.getByText('No tasks found.'));
 
     rerender(<TaskList projectId={2} />);
     await waitFor(() => {
@@ -170,21 +167,59 @@ describe('TaskList', () => {
     });
   });
 
-  it('removes a task from the list when deleted', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockTasks),
-    });
+  describe('Deletion Persistence Bug (Integration)', () => {
+    it('allows multiple tasks to be deleted independently without timer resets', async () => {
+      vi.useFakeTimers();
 
-    render(<TaskList projectId={1} />);
-    await waitFor(() => expect(screen.getAllByTestId('task-item')).toHaveLength(2));
+      mockFetch.mockImplementation((url) => {
+        if (url.includes('/api/tasks?projectId=')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTasks) });
+        }
+        return Promise.resolve({ ok: true });
+      });
 
-    screen.getByTestId('delete-task-1').click();
+      render(<TaskList projectId={1} />);
+      await waitFor(() => screen.getByText('First task'));
 
-    await waitFor(() => {
-      expect(screen.getAllByTestId('task-item')).toHaveLength(1);
-      expect(screen.queryByText('First task')).toBeNull();
-      expect(screen.getByText('Second task')).toBeInTheDocument();
+      // 1. Start deleting Task 1 at t=0
+      fireEvent.click(screen.getAllByRole('button', { name: 'Delete task' })[0]);
+      expect(screen.getByText('UNDO DELETION')).toBeInTheDocument();
+
+      // 2. Advance 2 seconds
+      vi.advanceTimersByTime(2000);
+
+      // 3. Start deleting Task 2 at t=2
+      const task2Container = screen.getByText('Second task').closest('.card-base');
+      const deleteBtn2 = task2Container?.querySelector('button[aria-label="Delete task"]');
+      if (deleteBtn2) fireEvent.click(deleteBtn2);
+      expect(screen.getAllByText('UNDO DELETION')).toHaveLength(2);
+
+      // 4. Advance 8 more seconds (t=10)
+      // Task 1 should trigger its DELETE request and be removed
+      vi.advanceTimersByTime(8000);
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/tasks/1',
+          expect.objectContaining({ method: 'DELETE' }),
+        );
+        expect(screen.queryByText('First task')).toBeNull();
+      });
+
+      // 5. Advance 2 more seconds (t=12)
+      // Task 2 should trigger its DELETE request (10s after its start at t=2)
+      // If the bug exists, this would fail because the timer would have reset at t=10
+      vi.advanceTimersByTime(2000);
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/tasks/2',
+          expect.objectContaining({ method: 'DELETE' }),
+        );
+        expect(screen.queryByText('Second task')).toBeNull();
+      });
+
+      expect(screen.getByText('Tasks (0)')).toBeInTheDocument();
     });
   });
 });

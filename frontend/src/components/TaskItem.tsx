@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import { Card } from './ui/Card';
 import { Text } from './ui/Text';
 import { Heading } from './ui/Heading';
@@ -24,7 +25,7 @@ interface TaskItemProps {
   onDelete: (taskId: number) => void;
 }
 
-export function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
+export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [name, setName] = useState(task.name);
@@ -121,9 +122,7 @@ export function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
       {/* Deletion Overlay: Prominent centered Undo and Top-Flush Progress */}
       {isDeleting && (
         <div className="card-deletion-overlay">
-          <Text className="card-deletion-text">
-            Task will be deleted
-          </Text>
+          <Text className="card-deletion-text">Task will be deleted</Text>
           <Button
             variant="primary"
             onClick={handleDeleteCancel}
@@ -182,9 +181,9 @@ export function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
                 <Button variant="ghost" onClick={() => setIsEditing(true)} aria-label="Edit task">
                   <Edit2 size={14} />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  onClick={handleDeleteStart} 
+                <Button
+                  variant="ghost"
+                  onClick={handleDeleteStart}
                   aria-label="Delete task"
                   className="btn-ghost-danger"
                 >
@@ -194,6 +193,7 @@ export function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
             )}
           </div>
         </Row>
+
         {/* Description Row */}
         <div>
           {isEditing ? (
@@ -211,4 +211,4 @@ export function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
       </div>
     </Card>
   );
-}
+});
