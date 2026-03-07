@@ -10,10 +10,8 @@ project_name: whack
 
 before:
   hooks:
-    - cmd: npm ci
-      dir: frontend
-    - cmd: npm run build
-      dir: frontend
+    - cd frontend && npm ci
+    - cd frontend && npm run build
     - go mod tidy
 
 builds:
