@@ -3,7 +3,7 @@
 #
 # Binaries for programs and plugins
 /whack
-/whackamole.db
+/whackamole.db*
 /.whackamole.yaml
 *.exe
 *.exe~
