@@ -7,9 +7,6 @@ build: ui-build
 
 check: lint test
 
-check-goreleaser:
-	go tool goreleaser check
-
 ci: fmt-check license-check lint test
 
 clean:

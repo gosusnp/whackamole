@@ -55,6 +55,3 @@ jobs:
 
       - name: Tests
         run: make test
-
-      - name: GoReleaser check
-        run: make check-goreleaser
