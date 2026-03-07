@@ -9,7 +9,14 @@ import { TaskList } from './TaskList';
 import type { Task } from '../types';
 
 vi.mock('./TaskItem', () => ({
-  TaskItem: ({ task }: { task: Task }) => <div data-testid="task-item">{task.name}</div>,
+  TaskItem: ({ task, onDelete }: { task: Task; onDelete: (id: number) => void }) => (
+    <div data-testid="task-item">
+      {task.name}
+      <button data-testid={`delete-task-${task.id}`} onClick={() => onDelete(task.id)}>
+        Delete
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock('./CreateTaskDialog', () => ({
@@ -160,6 +167,24 @@ describe('TaskList', () => {
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/tasks?projectId=1', { signal: undefined });
       expect(screen.getByText('Tasks (3)')).toBeInTheDocument();
+    });
+  });
+
+  it('removes a task from the list when deleted', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockTasks),
+    });
+
+    render(<TaskList projectId={1} />);
+    await waitFor(() => expect(screen.getAllByTestId('task-item')).toHaveLength(2));
+
+    screen.getByTestId('delete-task-1').click();
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('task-item')).toHaveLength(1);
+      expect(screen.queryByText('First task')).toBeNull();
+      expect(screen.getByText('Second task')).toBeInTheDocument();
     });
   });
 });

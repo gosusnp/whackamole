@@ -44,42 +44,43 @@ describe('TaskItem', () => {
   });
 
   it('renders the task name', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByText('Test task')).toBeInTheDocument();
   });
 
   it('renders the task description', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByTestId('markdown')).toHaveTextContent('Some description');
   });
 
   it('shows placeholder when description is empty', () => {
     const task = { ...mockTask, description: '' };
-    render(<TaskItem task={task} onUpdate={vi.fn()} />);
+    render(<TaskItem task={task} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByText('No description provided.')).toBeInTheDocument();
   });
 
-  it('shows the edit button', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+  it('shows the edit and delete buttons', () => {
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getByRole('button', { name: 'Edit task' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete task' })).toBeInTheDocument();
   });
 
   it('enters edit mode when edit button is clicked', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
     expect(screen.getByDisplayValue('Test task')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Some description')).toBeInTheDocument();
   });
 
   it('shows save and cancel buttons in edit mode', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
     expect(screen.getByRole('button', { name: 'Save task' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel edit' })).toBeInTheDocument();
   });
 
   it('restores original values and exits edit mode on cancel', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
 
     fireEvent.input(screen.getByDisplayValue('Test task'), { target: { value: 'Changed name' } });
@@ -91,7 +92,7 @@ describe('TaskItem', () => {
 
   it('calls fetch and onUpdate when saved with changes', async () => {
     const onUpdate = vi.fn();
-    render(<TaskItem task={mockTask} onUpdate={onUpdate} />);
+    render(<TaskItem task={mockTask} onUpdate={onUpdate} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
 
     fireEvent.input(screen.getByDisplayValue('Test task'), { target: { value: 'Updated name' } });
@@ -123,7 +124,7 @@ describe('TaskItem', () => {
   });
 
   it('does not call fetch when saved with no changes', async () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
 
@@ -133,7 +134,7 @@ describe('TaskItem', () => {
   });
 
   it('shows inline validation error when name is cleared', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
 
     fireEvent.input(screen.getByDisplayValue('Test task'), { target: { value: '   ' } });
@@ -144,7 +145,7 @@ describe('TaskItem', () => {
   });
 
   it('exits edit mode after successful save', async () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} />);
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
 
     fireEvent.input(screen.getByDisplayValue('Test task'), { target: { value: 'New name' } });
@@ -152,6 +153,63 @@ describe('TaskItem', () => {
 
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: 'Save task' })).toBeNull();
+    });
+  });
+
+  describe('Deletion', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('shows undo button and progress bar when delete is clicked', () => {
+      render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Delete task' }));
+
+      expect(screen.getByRole('button', { name: 'Undo delete' })).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    it('cancels deletion when undo is clicked', () => {
+      render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Delete task' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Undo delete' }));
+
+      expect(screen.queryByRole('button', { name: 'Undo delete' })).toBeNull();
+      expect(screen.queryByRole('progressbar')).toBeNull();
+      expect(screen.getByRole('button', { name: 'Delete task' })).toBeInTheDocument();
+    });
+
+    it('commits deletion after 10 seconds', async () => {
+      const onDelete = vi.fn();
+      render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={onDelete} />);
+
+      // Start deletion
+      fireEvent.click(screen.getByRole('button', { name: 'Delete task' }));
+      expect(screen.getByRole('button', { name: 'Undo delete' })).toBeInTheDocument();
+
+      // Fast-forward 10 seconds
+      vi.advanceTimersByTime(10000);
+
+      // Wait for the async delete operation to complete
+      await waitFor(
+        () => {
+          expect(mockFetch).toHaveBeenCalledWith(`/api/tasks/${mockTask.id}`, {
+            method: 'DELETE',
+          });
+        },
+        { timeout: 2000 },
+      );
+
+      await waitFor(
+        () => {
+          expect(onDelete).toHaveBeenCalledWith(mockTask.id);
+        },
+        { timeout: 2000 },
+      );
     });
   });
 });

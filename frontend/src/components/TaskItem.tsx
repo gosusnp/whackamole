@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useState } from 'preact/hooks';
+import { useState, useCallback } from 'preact/hooks';
 import { Card } from './ui/Card';
 import { Text } from './ui/Text';
 import { Heading } from './ui/Heading';
@@ -14,16 +14,19 @@ import { Input } from './ui/Input';
 import { Markdown } from './ui/Markdown';
 import { TaskStatusBadge } from './TaskStatusBadge';
 import { TaskTypeBadge } from './TaskTypeBadge';
-import { Edit2, Save, X } from 'lucide-preact';
+import { DeletionProgressBar } from './DeletionProgressBar';
+import { Edit2, Save, X, Trash2, Undo2 } from 'lucide-preact';
 import type { Task } from '../types';
 
 interface TaskItemProps {
   task: Task;
   onUpdate: (taskId: number, updates: Partial<Task>) => void;
+  onDelete: (taskId: number) => void;
 }
 
-export function TaskItem({ task, onUpdate }: TaskItemProps) {
+export function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [name, setName] = useState(task.name);
   const [description, setDescription] = useState(task.description || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -69,6 +72,24 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
     }
   };
 
+  const handleDeleteStart = () => setIsDeleting(true);
+  const handleDeleteCancel = () => setIsDeleting(false);
+
+  const handleDeleteCommit = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+      if (response.ok) {
+        onDelete(task.id);
+      } else {
+        console.error('Failed to delete task');
+        setIsDeleting(false);
+      }
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      setIsDeleting(false);
+    }
+  }, [task.id, onDelete]);
+
   const handleCancel = () => {
     setName(task.name);
     setDescription(task.description || '');
@@ -96,9 +117,28 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
   );
 
   return (
-    <Card title={cardHeader}>
+    <Card title={cardHeader} className={isDeleting ? 'card-destructive' : ''}>
+      {/* Deletion Overlay: Prominent centered Undo and Top-Flush Progress */}
+      {isDeleting && (
+        <div className="card-deletion-overlay">
+          <Text className="card-deletion-text">
+            Task will be deleted
+          </Text>
+          <Button
+            variant="primary"
+            onClick={handleDeleteCancel}
+            aria-label="Undo delete"
+            className="btn-destructive-large"
+          >
+            <Undo2 size={16} className="mr-2" />
+            UNDO DELETION
+          </Button>
+          <DeletionProgressBar onComplete={handleDeleteCommit} position="top" className="h-[3px]" />
+        </div>
+      )}
+
       <div className="flex flex-col gap-4">
-        {/* Name Row: Name + Edit Actions */}
+        {/* Name Row: Name + Edit/Delete Actions */}
         <Row justify="between" items="start" gap={4}>
           <div className="flex flex-1 flex-col gap-1">
             {isEditing ? (
@@ -138,13 +178,22 @@ export function TaskItem({ task, onUpdate }: TaskItemProps) {
                 </Button>
               </>
             ) : (
-              <Button variant="ghost" onClick={() => setIsEditing(true)} aria-label="Edit task">
-                <Edit2 size={14} />
-              </Button>
+              <>
+                <Button variant="ghost" onClick={() => setIsEditing(true)} aria-label="Edit task">
+                  <Edit2 size={14} />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={handleDeleteStart} 
+                  aria-label="Delete task"
+                  className="btn-ghost-danger"
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </>
             )}
           </div>
         </Row>
-
         {/* Description Row */}
         <div>
           {isEditing ? (

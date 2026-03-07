@@ -54,6 +54,10 @@ export function TaskList({ projectId }: TaskListProps) {
     );
   };
 
+  const handleDelete = (taskId: number) => {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  };
+
   const handleTaskCreated = () => {
     fetchTasks();
   };
@@ -76,7 +80,7 @@ export function TaskList({ projectId }: TaskListProps) {
         <Columns vertical>
           {tasks.map((task) => (
             <Column key={task.id}>
-              <TaskItem task={task} onUpdate={handleUpdate} />
+              <TaskItem task={task} onUpdate={handleUpdate} onDelete={handleDelete} />
             </Column>
           ))}
         </Columns>

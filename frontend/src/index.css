@@ -97,6 +97,12 @@
   .btn-ghost-active {
     @apply border-brand-primary/50 text-brand-primary bg-brand-primary/5;
   }
+  .btn-ghost-danger {
+    @apply text-type-bug hover:bg-type-bug/10 hover:border-type-bug/30 hover:text-type-bug;
+  }
+  .btn-destructive-large {
+    @apply flex items-center whitespace-nowrap bg-type-bug hover:bg-type-bug/90 border-none px-6 py-2 shadow-lg text-white font-bold transition-all duration-150;
+  }
 
   /* Form Elements */
   .input-base {
@@ -114,8 +120,17 @@
 
   /* Container: Cards */
   .card-base { 
-    @apply bg-bg-surface border border-border-base rounded-lg p-5 shadow-sm transition-all duration-150;
+    @apply relative overflow-hidden bg-bg-surface border border-border-base rounded-lg p-5 shadow-sm transition-all duration-150;
     @apply hover:border-brand-primary;
+  }
+  .card-destructive {
+    @apply border-type-bug/50;
+  }
+  .card-deletion-overlay {
+    @apply absolute inset-0 z-10 flex flex-col items-center justify-center bg-bg-surface/80 backdrop-blur-[2px] animate-in fade-in duration-200;
+  }
+  .card-deletion-text {
+    @apply mb-4 font-bold text-type-bug uppercase tracking-widest text-xs;
   }
   .card-header { @apply mb-4 flex justify-between items-start gap-4; }
   .card-title { @apply text-lg font-bold text-text-base truncate; }
@@ -164,4 +179,16 @@ body {
 
 pre, code, .text-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@keyframes deletion-progress {
+  0% { transform: scaleX(1); background-color: var(--accent-blue); }
+  60% { background-color: var(--accent-blue); }
+  70% { background-color: var(--type-bug); }
+  100% { transform: scaleX(0); background-color: var(--type-bug); }
+}
+
+.animate-deletion {
+  animation: deletion-progress 10s linear forwards;
+  transform-origin: left;
 }
