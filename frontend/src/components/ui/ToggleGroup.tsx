@@ -27,7 +27,12 @@ export function ToggleGroup({ items, value, onValueChange }: ToggleGroupProps) {
       }}
     >
       {items.map((item) => (
-        <RadixToggleGroup.Item key={item.value} className="toggle-group-item" value={item.value}>
+        <RadixToggleGroup.Item
+          key={item.value}
+          className="toggle-group-item"
+          value={item.value}
+          data-value={item.value}
+        >
           {item.label}
         </RadixToggleGroup.Item>
       ))}
