@@ -85,7 +85,7 @@ describe('TaskStatusBadge', () => {
     render(<TaskStatusBadge task={mockTask} onStatusUpdate={onStatusUpdate} />);
 
     fireEvent.click(screen.getByTestId('popover-trigger'));
-    fireEvent.click(screen.getByText('inProgress'));
+    fireEvent.click(screen.getByText('IN PROGRESS'));
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -110,7 +110,7 @@ describe('TaskStatusBadge', () => {
     render(<TaskStatusBadge task={mockTask} onStatusUpdate={vi.fn()} />);
 
     fireEvent.click(screen.getByTestId('popover-trigger'));
-    fireEvent.click(within(screen.getByTestId('popover-content')).getByText('notStarted'));
+    fireEvent.click(within(screen.getByTestId('popover-content')).getByText('NOT STARTED'));
 
     await waitFor(() => {
       expect(mockFetch).not.toHaveBeenCalled();

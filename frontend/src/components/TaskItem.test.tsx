@@ -212,4 +212,31 @@ describe('TaskItem', () => {
       );
     });
   });
+
+  describe('Visual States', () => {
+    it('applies recession class for completed tasks', () => {
+      const completedTask = { ...mockTask, status: 'completed' as const };
+      const { container } = render(
+        <TaskItem task={completedTask} onUpdate={vi.fn()} onDelete={vi.fn()} />,
+      );
+      // The Card component applies classes to the outer div
+      expect(container.firstChild).toHaveClass('card-recession');
+    });
+
+    it('applies recession class for closed tasks', () => {
+      const closedTask = { ...mockTask, status: 'closed' as const };
+      const { container } = render(
+        <TaskItem task={closedTask} onUpdate={vi.fn()} onDelete={vi.fn()} />,
+      );
+      expect(container.firstChild).toHaveClass('card-recession');
+    });
+
+    it('does not apply recession class for active tasks', () => {
+      const activeTask = { ...mockTask, status: 'inProgress' as const };
+      const { container } = render(
+        <TaskItem task={activeTask} onUpdate={vi.fn()} onDelete={vi.fn()} />,
+      );
+      expect(container.firstChild).not.toHaveClass('card-recession');
+    });
+  });
 });

@@ -117,11 +117,14 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
     </Row>
   );
 
+  const isTerminal = task.status === 'completed' || task.status === 'closed';
+
   return (
     <Card
       title={cardHeader}
-      className={`${isDeleting ? 'card-destructive' : ''} card-type-container card-type-${task.type}`}
+      className={`${isDeleting ? 'card-destructive' : ''} ${isTerminal ? 'card-recession' : ''} card-type-container card-type-${task.type}`}
     >
+      {' '}
       {/* Deletion Overlay: Prominent centered Undo and Top-Flush Progress */}
       {isDeleting && (
         <div className="card-deletion-overlay">
@@ -138,7 +141,6 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
           <DeletionProgressBar onComplete={handleDeleteCommit} position="top" className="h-[3px]" />
         </div>
       )}
-
       <div className="flex flex-col gap-4">
         {/* Name Row: Name + Edit/Delete Actions */}
         <Row justify="between" items="start" gap={4}>

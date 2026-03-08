@@ -22,6 +22,12 @@
   --color-type-refactor: var(--type-refactor);
   --color-type-docs: var(--type-docs);
   --color-type-chore: var(--type-chore);
+
+  --color-status-not-started: var(--status-not-started);
+  --color-status-in-progress: var(--status-in-progress);
+  --color-status-blocked: var(--status-blocked);
+  --color-status-completed: var(--status-completed);
+  --color-status-closed: var(--status-closed);
 }
 
 :root {
@@ -42,6 +48,12 @@
   --type-docs: #94A3B8;
   --type-chore: #94A3B8;
   --type-fix: #FF9F0A;
+
+  --status-not-started: #64748B;
+  --status-in-progress: #00ADD8;
+  --status-blocked: #FF453A;
+  --status-completed: #34C759;
+  --status-closed: #475569;
 
   --logo-filter: none;
 
@@ -66,6 +78,12 @@
   --type-docs: #94A3B8;
   --type-chore: #94A3B8;
   --type-fix: #FF9F0A;
+
+  --status-not-started: #64748B;
+  --status-in-progress: #00ADD8;
+  --status-blocked: #FF453A;
+  --status-completed: #34C759;
+  --status-closed: #475569;
 
   --logo-filter: invert(1);
 }
@@ -140,6 +158,10 @@
   .card-destructive {
     @apply border-type-bug/50;
   }
+  .card-recession {
+    opacity: 0.4;
+    transition: opacity 0.2s ease-in-out;
+  }
   .card-deletion-overlay {
     @apply absolute inset-0 z-30 flex flex-col items-center justify-center bg-bg-surface/80 backdrop-blur-[2px] animate-in fade-in duration-200;
   }
@@ -181,6 +203,12 @@
   .toggle-group-item[data-value="refactor"] { @apply text-type-refactor; }
   .toggle-group-item[data-value="docs"] { @apply text-type-docs; }
   .toggle-group-item[data-value="chore"] { @apply text-type-chore; }
+  
+  .toggle-group-item[data-value="notStarted"] { @apply text-status-not-started; }
+  .toggle-group-item[data-value="inProgress"] { @apply text-status-in-progress; }
+  .toggle-group-item[data-value="blocked"] { @apply text-status-blocked; }
+  .toggle-group-item[data-value="completed"] { @apply text-status-completed; }
+  .toggle-group-item[data-value="closed"] { @apply text-status-closed; }
 
   /* Hover states for unselected items */
   .toggle-group-item[data-state="off"]:hover { @apply bg-bg-surface shadow-sm; }
@@ -190,6 +218,12 @@
   .toggle-group-item[data-state="off"][data-value="refactor"]:hover { @apply bg-type-refactor/5; }
   .toggle-group-item[data-state="off"][data-value="docs"]:hover { @apply bg-type-docs/5; }
   .toggle-group-item[data-state="off"][data-value="chore"]:hover { @apply bg-type-chore/5; }
+  
+  .toggle-group-item[data-state="off"][data-value="notStarted"]:hover { @apply bg-status-not-started/5; }
+  .toggle-group-item[data-state="off"][data-value="inProgress"]:hover { @apply bg-status-in-progress/5; }
+  .toggle-group-item[data-state="off"][data-value="blocked"]:hover { @apply bg-status-blocked/5; }
+  .toggle-group-item[data-state="off"][data-value="completed"]:hover { @apply bg-status-completed/5; }
+  .toggle-group-item[data-state="off"][data-value="closed"]:hover { @apply bg-status-closed/5; }
 
   .toggle-group-item[data-state="on"] { @apply bg-brand-primary/10 text-brand-primary border-brand-primary/30; }
   
@@ -199,6 +233,12 @@
   .toggle-group-item[data-state="on"][data-value="refactor"] { @apply bg-type-refactor/10 text-type-refactor border-type-refactor/30; }
   .toggle-group-item[data-state="on"][data-value="docs"] { @apply bg-type-docs/10 text-type-docs border-type-docs/30; }
   .toggle-group-item[data-state="on"][data-value="chore"] { @apply bg-type-chore/10 text-type-chore border-type-chore/30; }
+  
+  .toggle-group-item[data-state="on"][data-value="notStarted"] { @apply bg-status-not-started/10 text-status-not-started border-status-not-started/30; }
+  .toggle-group-item[data-state="on"][data-value="inProgress"] { @apply bg-status-in-progress/10 text-status-in-progress border-status-in-progress/30; }
+  .toggle-group-item[data-state="on"][data-value="blocked"] { @apply bg-status-blocked/10 text-status-blocked border-status-blocked/30; }
+  .toggle-group-item[data-state="on"][data-value="completed"] { @apply bg-status-completed/10 text-status-completed border-status-completed/30; }
+  .toggle-group-item[data-state="on"][data-value="closed"] { @apply bg-status-closed/10 text-status-closed border-status-closed/30; }
 
   /* Task Type Categories */
   .card-type-feat { 
@@ -242,6 +282,13 @@
   .badge-refactor { @apply bg-type-refactor/10 text-type-refactor border border-type-refactor/20; }
   .badge-docs { @apply bg-type-docs/10 text-type-docs border border-type-docs/20; }
   .badge-chore { @apply bg-type-chore/10 text-type-chore border border-type-chore/20; }
+  
+  /* Status Badge Styles */
+  .badge-status-notStarted { @apply text-status-not-started border-status-not-started/30 hover:bg-status-not-started/10; }
+  .badge-status-inProgress { @apply text-status-in-progress border-status-in-progress/30 hover:bg-status-in-progress/10; }
+  .badge-status-blocked { @apply text-status-blocked border-status-blocked/30 hover:bg-status-blocked/10; }
+  .badge-status-completed { @apply text-status-completed border-status-completed/30 hover:bg-status-completed/10; }
+  .badge-status-closed { @apply text-status-closed border-status-closed/30 hover:bg-status-closed/10; }
 }
 
 :root {

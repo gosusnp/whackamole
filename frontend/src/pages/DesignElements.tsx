@@ -91,6 +91,36 @@ export function DesignElements() {
         </div>
       ),
     },
+    {
+      id: 'tab4',
+      label: 'Statuses',
+      content: (
+        <Columns vertical>
+          <Column>
+            <div className="mb-8 flex flex-wrap gap-4">
+              <button className="btn-ghost badge-status-notStarted">NOT STARTED</button>
+              <button className="btn-ghost badge-status-inProgress">IN PROGRESS</button>
+              <button className="btn-ghost badge-status-blocked">BLOCKED</button>
+              <button className="btn-ghost badge-status-completed">COMPLETED</button>
+              <button className="btn-ghost badge-status-closed">CLOSED</button>
+            </div>
+
+            <Heading level={2}>Terminal State Recession</Heading>
+            <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <Card title="Active Task" className="card-type-container card-type-feat">
+                <Text>This is an active task (100% opacity).</Text>
+              </Card>
+              <Card
+                title="Completed Task"
+                className="card-type-container card-type-feat card-recession"
+              >
+                <Text>This is a completed task (40% opacity).</Text>
+              </Card>
+            </div>
+          </Column>
+        </Columns>
+      ),
+    },
   ];
 
   return (

@@ -14,11 +14,11 @@ interface TaskStatusBadgeProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: 'notStarted', label: 'notStarted' },
-  { value: 'inProgress', label: 'inProgress' },
-  { value: 'blocked', label: 'blocked' },
-  { value: 'completed', label: 'completed' },
-  { value: 'closed', label: 'closed' },
+  { value: 'notStarted', label: 'NOT STARTED' },
+  { value: 'inProgress', label: 'IN PROGRESS' },
+  { value: 'blocked', label: 'BLOCKED' },
+  { value: 'completed', label: 'COMPLETED' },
+  { value: 'closed', label: 'CLOSED' },
 ];
 
 export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) {
@@ -62,10 +62,7 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
       open={isOpen}
       onOpenChange={setIsOpen}
       trigger={
-        <button
-          className={`btn-ghost ${task.status === 'completed' ? '' : 'btn-ghost-active'}`}
-          disabled={isUpdating}
-        >
+        <button className={`btn-ghost badge-status-${task.status}`} disabled={isUpdating}>
           {task.status}
         </button>
       }
