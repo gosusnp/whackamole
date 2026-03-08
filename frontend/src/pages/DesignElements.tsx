@@ -71,6 +71,26 @@ export function DesignElements() {
         </Columns>
       ),
     },
+    {
+      id: 'tab3',
+      label: 'Task Types',
+      content: (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {(['feat', 'fix', 'bug', 'docs', 'refactor', 'chore'] as const).map((type) => (
+            <Card
+              key={type}
+              title={`${type.toUpperCase()} Card`}
+              className={`card-type-container card-type-${type}`}
+            >
+              <Text>
+                This card showcases the <strong>{type}</strong> category with a high-signal vertical
+                anchoring bar and a subtle gradient wash.
+              </Text>
+            </Card>
+          ))}
+        </div>
+      ),
+    },
   ];
 
   return (

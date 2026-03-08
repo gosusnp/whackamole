@@ -118,7 +118,10 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
   );
 
   return (
-    <Card title={cardHeader} className={isDeleting ? 'card-destructive' : ''}>
+    <Card
+      title={cardHeader}
+      className={`${isDeleting ? 'card-destructive' : ''} card-type-container card-type-${task.type}`}
+    >
       {/* Deletion Overlay: Prominent centered Undo and Top-Flush Progress */}
       {isDeleting && (
         <div className="card-deletion-overlay">

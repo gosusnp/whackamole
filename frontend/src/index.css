@@ -18,6 +18,10 @@
   
   --color-type-feat: var(--type-feat);
   --color-type-bug: var(--type-bug);
+  --color-type-fix: var(--type-fix);
+  --color-type-refactor: var(--type-refactor);
+  --color-type-docs: var(--type-docs);
+  --color-type-chore: var(--type-chore);
 }
 
 :root {
@@ -31,8 +35,13 @@
   
   --accent-blue: #2563eb;
   --accent-blue-hover: #1d4ed8;
-  --type-feat: #10b981;
-  --type-bug: #ef4444;
+
+  --type-bug: #FF453A;
+  --type-feat: #00ADD8;
+  --type-refactor: #BF5AF2;
+  --type-docs: #94A3B8;
+  --type-chore: #94A3B8;
+  --type-fix: #FF9F0A;
 
   --logo-filter: none;
 
@@ -50,8 +59,13 @@
   
   --accent-blue: #60a5fa;
   --accent-blue-hover: #93c5fd;
-  --type-feat: #34d399;
-  --type-bug: #f87171;
+
+  --type-bug: #FF453A;
+  --type-feat: #00ADD8;
+  --type-refactor: #BF5AF2;
+  --type-docs: #94A3B8;
+  --type-chore: #94A3B8;
+  --type-fix: #FF9F0A;
 
   --logo-filter: invert(1);
 }
@@ -161,9 +175,48 @@
   }
   .toggle-group-item[data-state="on"] { @apply bg-brand-primary text-white; }
 
+  /* Task Type Categories */
+  .card-type-feat { 
+    --category-color: var(--type-feat);
+  }
+  .card-type-bug { 
+    --category-color: var(--type-bug);
+  }
+  .card-type-fix { 
+    --category-color: var(--type-fix);
+  }
+  .card-type-refactor { 
+    --category-color: var(--type-refactor);
+  }
+  .card-type-docs { 
+    --category-color: var(--type-docs);
+  }
+  .card-type-chore { 
+    --category-color: var(--type-chore);
+  }
+
+  .card-type-container {
+    @apply relative overflow-hidden;
+    background-image: linear-gradient(90deg, color-mix(in srgb, var(--category-color), transparent 96%) 0%, transparent 20%);
+  }
+
+  .card-type-container::before {
+    content: "";
+    @apply absolute left-0 top-0 bottom-0 w-[4px] transition-all duration-150 z-20;
+    background-color: var(--category-color);
+  }
+
+  .card-type-container:hover::before {
+    @apply w-[6px];
+  }
+
   /* Badge Styles */
   .badge-feat { @apply bg-type-feat/10 text-type-feat border border-type-feat/20; }
   .badge-bug { @apply bg-type-bug/10 text-type-bug border border-type-bug/20; }
+  .badge-fix { @apply bg-type-fix/10 text-type-fix border border-type-fix/20; }
+  .badge-refactor { @apply bg-type-refactor/10 text-type-refactor border border-type-refactor/20; }
+  .badge-docs { @apply bg-type-docs/10 text-type-docs border border-type-docs/20; }
+  .badge-chore { @apply bg-type-chore/10 text-type-chore border border-type-chore/20; }
 }
 
 :root {
