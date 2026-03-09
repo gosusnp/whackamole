@@ -77,7 +77,7 @@ func createMCPServer(path string) (*server.MCPServer, error) {
 		mcp.WithString("name", mcp.Required(), mcp.Description("The name of the task")),
 		mcp.WithString("description", mcp.Description("The description of the task (supports Markdown)")),
 		mcp.WithString("type", mcp.Description("The type of the task (feat, bug, docs, refactor, chore)")),
-		mcp.WithString("status", mcp.Description("The status of the task (notStarted, inProgress, blocked, completed, closed)")),
+		mcp.WithString("status", mcp.Description("The status of the task (notStarted, inProgress, review, blocked, completed, closed)")),
 	), addTaskHandler(taskStore, projectStore))
 
 	// Update Task

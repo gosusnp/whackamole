@@ -100,6 +100,7 @@ export function DesignElements() {
             <div className="mb-8 flex flex-wrap gap-4">
               <button className="btn-ghost badge-status-notStarted">NOT STARTED</button>
               <button className="btn-ghost badge-status-inProgress">IN PROGRESS</button>
+              <button className="btn-ghost badge-status-review">REVIEW</button>
               <button className="btn-ghost badge-status-blocked">BLOCKED</button>
               <button className="btn-ghost badge-status-completed">COMPLETED</button>
               <button className="btn-ghost badge-status-closed">CLOSED</button>

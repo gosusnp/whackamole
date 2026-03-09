@@ -24,6 +24,7 @@
 
   --color-status-not-started: var(--status-not-started);
   --color-status-in-progress: var(--status-in-progress);
+  --color-status-review: var(--status-review);
   --color-status-blocked: var(--status-blocked);
   --color-status-completed: var(--status-completed);
   --color-status-closed: var(--status-closed);
@@ -49,6 +50,7 @@
 
   --status-not-started: #64748B;
   --status-in-progress: #00ADD8;
+  --status-review: #FFCC00;
   --status-blocked: #FF453A;
   --status-completed: #34C759;
   --status-closed: #475569;
@@ -78,6 +80,7 @@
 
   --status-not-started: #64748B;
   --status-in-progress: #00ADD8;
+  --status-review: #FFCC00;
   --status-blocked: #FF453A;
   --status-completed: #34C759;
   --status-closed: #475569;
@@ -213,6 +216,7 @@
   
   .toggle-group-item[data-value="notStarted"] { @apply text-status-not-started; }
   .toggle-group-item[data-value="inProgress"] { @apply text-status-in-progress; }
+  .toggle-group-item[data-value="review"] { @apply text-status-review; }
   .toggle-group-item[data-value="blocked"] { @apply text-status-blocked; }
   .toggle-group-item[data-value="completed"] { @apply text-status-completed; }
   .toggle-group-item[data-value="closed"] { @apply text-status-closed; }
@@ -227,6 +231,7 @@
   
   .toggle-group-item[data-state="off"][data-value="notStarted"]:hover { @apply bg-status-not-started/5; }
   .toggle-group-item[data-state="off"][data-value="inProgress"]:hover { @apply bg-status-in-progress/5; }
+  .toggle-group-item[data-state="off"][data-value="review"]:hover { @apply bg-status-review/5; }
   .toggle-group-item[data-state="off"][data-value="blocked"]:hover { @apply bg-status-blocked/5; }
   .toggle-group-item[data-state="off"][data-value="completed"]:hover { @apply bg-status-completed/5; }
   .toggle-group-item[data-state="off"][data-value="closed"]:hover { @apply bg-status-closed/5; }
@@ -241,6 +246,7 @@
   
   .toggle-group-item[data-state="on"][data-value="notStarted"] { @apply bg-status-not-started/10 text-status-not-started border-status-not-started/30; }
   .toggle-group-item[data-state="on"][data-value="inProgress"] { @apply bg-status-in-progress/10 text-status-in-progress border-status-in-progress/30; }
+  .toggle-group-item[data-state="on"][data-value="review"] { @apply bg-status-review/10 text-status-review border-status-review/30; }
   .toggle-group-item[data-state="on"][data-value="blocked"] { @apply bg-status-blocked/10 text-status-blocked border-status-blocked/30; }
   .toggle-group-item[data-state="on"][data-value="completed"] { @apply bg-status-completed/10 text-status-completed border-status-completed/30; }
   .toggle-group-item[data-state="on"][data-value="closed"] { @apply bg-status-closed/10 text-status-closed border-status-closed/30; }
@@ -287,6 +293,7 @@
   /* Status Badge Styles */
   .badge-status-notStarted { @apply text-status-not-started border-status-not-started/30 hover:bg-status-not-started/10; }
   .badge-status-inProgress { @apply text-status-in-progress border-status-in-progress/30 hover:bg-status-in-progress/10; }
+  .badge-status-review { @apply text-status-review border-status-review/30 hover:bg-status-review/10; }
   .badge-status-blocked { @apply text-status-blocked border-status-blocked/30 hover:bg-status-blocked/10; }
   .badge-status-completed { @apply text-status-completed border-status-completed/30 hover:bg-status-completed/10; }
   .badge-status-closed { @apply text-status-closed border-status-closed/30 hover:bg-status-closed/10; }

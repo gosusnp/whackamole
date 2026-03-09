@@ -4,7 +4,13 @@
  */
 
 export type TaskType = 'feat' | 'bug' | 'docs' | 'refactor' | 'chore';
-export type TaskStatus = 'notStarted' | 'inProgress' | 'blocked' | 'completed' | 'closed';
+export type TaskStatus =
+  | 'notStarted'
+  | 'inProgress'
+  | 'review'
+  | 'blocked'
+  | 'completed'
+  | 'closed';
 
 export interface Task {
   id: number;

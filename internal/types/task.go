@@ -22,6 +22,7 @@ type TaskStatus string
 const (
 	TaskStatusNotStarted TaskStatus = "notStarted"
 	TaskStatusInProgress TaskStatus = "inProgress"
+	TaskStatusReview     TaskStatus = "review"
 	TaskStatusBlocked    TaskStatus = "blocked"
 	TaskStatusCompleted  TaskStatus = "completed"
 	TaskStatusClosed     TaskStatus = "closed"

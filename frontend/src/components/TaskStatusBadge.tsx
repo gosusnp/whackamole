@@ -16,6 +16,7 @@ interface TaskStatusBadgeProps {
 const STATUS_OPTIONS = [
   { value: 'notStarted', label: 'NOT STARTED' },
   { value: 'inProgress', label: 'IN PROGRESS' },
+  { value: 'review', label: 'REVIEW' },
   { value: 'blocked', label: 'BLOCKED' },
   { value: 'completed', label: 'COMPLETED' },
   { value: 'closed', label: 'CLOSED' },
