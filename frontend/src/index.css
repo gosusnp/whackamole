@@ -177,11 +177,22 @@
   .tabs-root { @apply flex flex-col w-full; }
   .tabs-list { @apply flex border-b border-border-base gap-1 mb-6; }
   .tabs-trigger {
-    @apply px-4 py-2 text-sm font-bold text-text-muted border-b-2 border-transparent transition-all duration-150;
+    @apply flex items-center px-4 py-2 text-sm font-bold text-text-muted border-b-2 border-transparent transition-all duration-150;
     @apply hover:text-text-base;
   }
   .tabs-trigger[data-state="active"] { @apply text-brand-primary border-brand-primary; }
   .tabs-content { @apply outline-none; }
+
+  .tab-delete-button {
+    @apply ml-2 p-0.5 rounded-sm text-text-muted/30 transition-all duration-150;
+    @apply hover:text-type-bug hover:bg-type-bug/10;
+  }
+  .tabs-trigger[data-state="active"] .tab-delete-button {
+    @apply text-text-muted/50;
+  }
+  .tabs-trigger[data-state="active"] .tab-delete-button:hover {
+    @apply text-type-bug;
+  }
 
   /* Interaction: Popover */
   .popover-content {

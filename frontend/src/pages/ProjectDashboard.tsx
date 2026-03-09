@@ -11,6 +11,7 @@ import { Text } from '../components/ui/Text';
 import { Row } from '../components/ui/Row';
 import { Button } from '../components/ui/Button';
 import { CreateProjectDialog } from '../components/CreateProjectDialog';
+import { DeleteProjectDialog } from '../components/DeleteProjectDialog';
 import { Sun, Moon } from 'lucide-preact';
 
 interface Project {
@@ -34,16 +35,23 @@ export function ProjectDashboard() {
         const res = await fetch('/api/projects');
         if (!res.ok) throw new Error('Failed to fetch projects');
         const data = await res.json();
-        const projectList = data || [];
+        const projectList = (data || []) as Project[];
         setProjects(projectList);
 
         if (selectId) {
           setSelectedProjectId(selectId);
           localStorage.setItem('whack-last-project-id', selectId);
-        } else if (!selectedProjectId && projectList.length > 0) {
-          const firstId = String(projectList[0].id);
-          setSelectedProjectId(firstId);
-          localStorage.setItem('whack-last-project-id', firstId);
+        } else if (projectList.length > 0) {
+          // If the currently selected project is gone, or nothing is selected, select the first one
+          const currentExists = projectList.some((p) => String(p.id) === selectedProjectId);
+          if (!currentExists || !selectedProjectId) {
+            const firstId = String(projectList[0].id);
+            setSelectedProjectId(firstId);
+            localStorage.setItem('whack-last-project-id', firstId);
+          }
+        } else {
+          setSelectedProjectId(undefined);
+          localStorage.removeItem('whack-last-project-id');
         }
 
         setLoading(false);
@@ -106,10 +114,21 @@ export function ProjectDashboard() {
       </div>
     );
 
+  const handleProjectDeleted = () => {
+    fetchProjects();
+  };
+
   const tabItems = projects.map((project) => ({
     id: String(project.id),
     label: project.name,
     content: <TaskList projectId={project.id} />,
+    extra: (
+      <DeleteProjectDialog
+        projectId={project.id}
+        projectName={project.name}
+        onProjectDeleted={handleProjectDeleted}
+      />
+    ),
   }));
 
   const handleProjectCreated = (newId: string) => {

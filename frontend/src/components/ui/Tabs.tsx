@@ -10,6 +10,7 @@ interface TabItem {
   id: string;
   label: string;
   content: ComponentChildren;
+  extra?: ComponentChildren;
 }
 
 interface TabsProps {
@@ -34,6 +35,7 @@ export function Tabs({ items, defaultValue, value, onValueChange, headerExtra }:
         {items.map((item) => (
           <RadixTabs.Trigger key={item.id} value={item.id} className="tabs-trigger">
             {item.label}
+            {item.extra}
           </RadixTabs.Trigger>
         ))}
         {headerExtra}
