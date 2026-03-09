@@ -76,7 +76,7 @@ export function DesignElements() {
       label: 'Task Types',
       content: (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {(['feat', 'fix', 'bug', 'docs', 'refactor', 'chore'] as const).map((type) => (
+          {(['feat', 'bug', 'docs', 'refactor', 'chore'] as const).map((type) => (
             <Card
               key={type}
               title={`${type.toUpperCase()} Card`}

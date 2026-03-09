@@ -79,14 +79,14 @@ describe('TaskTypeBadge', () => {
     render(<TaskTypeBadge task={mockTask} onTypeUpdate={onTypeUpdate} />);
 
     fireEvent.click(screen.getByTestId('popover-trigger'));
-    fireEvent.click(screen.getByText('fix'));
+    fireEvent.click(screen.getByText('bug'));
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         `/api/tasks/${mockTask.id}`,
         expect.objectContaining({
           method: 'PATCH',
-          body: JSON.stringify({ type: 'fix' }),
+          body: JSON.stringify({ type: 'bug' }),
         }),
       );
       // Ensure no other fields from the task are sent
@@ -96,7 +96,7 @@ describe('TaskTypeBadge', () => {
       expect(lastCallBody).not.toHaveProperty('status');
       expect(lastCallBody).not.toHaveProperty('id');
 
-      expect(onTypeUpdate).toHaveBeenCalledWith('fix');
+      expect(onTypeUpdate).toHaveBeenCalledWith('bug');
     });
   });
 

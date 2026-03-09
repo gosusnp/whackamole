@@ -139,7 +139,7 @@ describe('CreateTaskDialog', () => {
 
     // Fill
     await user.type(screen.getByPlaceholderText(/what needs to be done/i), 'New Task');
-    await user.click(screen.getByText('Fix'));
+    await user.click(screen.getByText('Bug'));
 
     // Submit
     await user.click(screen.getByRole('button', { name: /create task/i }));

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-export type TaskType = 'feat' | 'fix' | 'bug' | 'docs' | 'refactor' | 'chore';
+export type TaskType = 'feat' | 'bug' | 'docs' | 'refactor' | 'chore';
 export type TaskStatus = 'notStarted' | 'inProgress' | 'blocked' | 'completed' | 'closed';
 
 export interface Task {

@@ -105,7 +105,6 @@ export function CreateTaskDialog({ projectId, onTaskCreated }: CreateTaskDialogP
               onValueChange={(val) => setType(val as TaskType)}
               items={[
                 { value: 'feat', label: 'Feat' },
-                { value: 'fix', label: 'Fix' },
                 { value: 'bug', label: 'Bug' },
                 { value: 'docs', label: 'Docs' },
                 { value: 'refactor', label: 'Refactor' },

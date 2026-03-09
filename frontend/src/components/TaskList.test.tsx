@@ -44,7 +44,7 @@ const mockTasks: Task[] = [
     projectId: 1,
     name: 'Second task',
     description: 'Desc 2',
-    type: 'fix',
+    type: 'bug',
     status: 'inProgress',
   },
 ];

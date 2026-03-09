@@ -15,7 +15,6 @@ interface TaskTypeBadgeProps {
 
 const TYPE_OPTIONS = [
   { value: 'feat', label: 'feat' },
-  { value: 'fix', label: 'fix' },
   { value: 'bug', label: 'bug' },
   { value: 'docs', label: 'docs' },
   { value: 'refactor', label: 'refactor' },

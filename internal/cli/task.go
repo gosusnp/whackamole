@@ -233,7 +233,7 @@ func init() {
 	taskCmd.AddCommand(taskShowCmd)
 
 	taskAddCmd.Flags().StringVarP(&taskDesc, "desc", "d", "", "Task description")
-	taskAddCmd.Flags().StringVarP(&taskType, "type", "t", string(types.TaskTypeFeat), "Task type (feat, fix, bug, docs, refactor, chore)")
+	taskAddCmd.Flags().StringVarP(&taskType, "type", "t", string(types.TaskTypeFeat), "Task type (feat, bug, docs, refactor, chore)")
 	taskAddCmd.Flags().StringVarP(&taskStatus, "status", "s", string(types.TaskStatusNotStarted), "Task status (notStarted, inProgress, blocked, completed, closed)")
 
 	taskListCmd.Flags().BoolVarP(&taskAll, "all", "a", false, "Show all tasks (including completed and closed)")

@@ -11,7 +11,6 @@ type TaskType string
 
 const (
 	TaskTypeFeat     TaskType = "feat"
-	TaskTypeFix      TaskType = "fix"
 	TaskTypeBug      TaskType = "bug"
 	TaskTypeDocs     TaskType = "docs"
 	TaskTypeRefactor TaskType = "refactor"
