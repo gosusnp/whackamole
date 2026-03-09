@@ -17,9 +17,10 @@ interface TabsProps {
   defaultValue?: string;
   value?: string;
   onValueChange?: (value: string) => void;
+  headerExtra?: ComponentChildren;
 }
 
-export function Tabs({ items, defaultValue, value, onValueChange }: TabsProps) {
+export function Tabs({ items, defaultValue, value, onValueChange, headerExtra }: TabsProps) {
   const defaultTab = defaultValue || items[0]?.id;
 
   return (
@@ -35,6 +36,7 @@ export function Tabs({ items, defaultValue, value, onValueChange }: TabsProps) {
             {item.label}
           </RadixTabs.Trigger>
         ))}
+        {headerExtra}
       </RadixTabs.List>
       {items.map((item) => (
         <RadixTabs.Content key={item.id} value={item.id} className="tabs-content">

@@ -17,11 +17,11 @@ vi.mock('../components/ui/Tabs', () => ({
   Tabs: ({
     items,
     onValueChange,
-    defaultValue,
+    value,
   }: {
     items: { id: string; label: string; content: unknown }[];
     onValueChange?: (id: string) => void;
-    defaultValue?: string;
+    value?: string;
   }) => (
     <div>
       {items.map((item) => (
@@ -29,13 +29,17 @@ vi.mock('../components/ui/Tabs', () => ({
           key={item.id}
           role="tab"
           onClick={() => onValueChange?.(item.id)}
-          aria-selected={defaultValue === item.id}
+          aria-selected={value === item.id}
         >
           {item.label}
         </button>
       ))}
     </div>
   ),
+}));
+
+vi.mock('../components/CreateProjectDialog', () => ({
+  CreateProjectDialog: () => <div data-testid="create-project-dialog" />,
 }));
 const mockProjects = [
   { id: 1, name: 'Alpha', key: 'alpha' },
@@ -84,7 +88,8 @@ describe('ProjectDashboard', () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
-    expect(screen.getByText('No projects found.')).toBeInTheDocument();
+    expect(screen.getByText(/No projects found/)).toBeInTheDocument();
+    expect(screen.getByTestId('create-project-dialog')).toBeInTheDocument();
   });
 
   it('shows error state when fetch rejects', async () => {

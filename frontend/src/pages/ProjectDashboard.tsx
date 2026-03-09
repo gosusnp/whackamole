@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useCallback } from 'preact/hooks';
 import { Tabs } from '../components/ui/Tabs';
 import { TaskList } from '../components/TaskList';
 import { Heading } from '../components/ui/Heading';
 import { Text } from '../components/ui/Text';
 import { Row } from '../components/ui/Row';
 import { Button } from '../components/ui/Button';
+import { CreateProjectDialog } from '../components/CreateProjectDialog';
 import { Sun, Moon } from 'lucide-preact';
 
 interface Project {
@@ -25,6 +26,34 @@ export function ProjectDashboard() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(
     localStorage.getItem('whack-last-project-id') || undefined,
+  );
+
+  const fetchProjects = useCallback(
+    async (selectId?: string) => {
+      try {
+        const res = await fetch('/api/projects');
+        if (!res.ok) throw new Error('Failed to fetch projects');
+        const data = await res.json();
+        const projectList = data || [];
+        setProjects(projectList);
+
+        if (selectId) {
+          setSelectedProjectId(selectId);
+          localStorage.setItem('whack-last-project-id', selectId);
+        } else if (!selectedProjectId && projectList.length > 0) {
+          const firstId = String(projectList[0].id);
+          setSelectedProjectId(firstId);
+          localStorage.setItem('whack-last-project-id', firstId);
+        }
+
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError('Failed to load projects. Please refresh.');
+        setLoading(false);
+      }
+    },
+    [selectedProjectId],
   );
 
   // Initialize theme
@@ -61,23 +90,7 @@ export function ProjectDashboard() {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetch('/api/projects', { signal: controller.signal })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch projects');
-        return res.json();
-      })
-      .then((data) => {
-        setProjects(data || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        if (err.name === 'AbortError') return;
-        console.error('Error fetching projects:', err);
-        setError('Failed to load projects. Please refresh.');
-        setLoading(false);
-      });
-    return () => controller.abort();
+    fetchProjects();
   }, []);
 
   if (loading)
@@ -92,18 +105,16 @@ export function ProjectDashboard() {
         <Text muted>{error}</Text>
       </div>
     );
-  if (projects.length === 0)
-    return (
-      <div className="p-8">
-        <Text muted>No projects found.</Text>
-      </div>
-    );
 
   const tabItems = projects.map((project) => ({
     id: String(project.id),
     label: project.name,
     content: <TaskList projectId={project.id} />,
   }));
+
+  const handleProjectCreated = (newId: string) => {
+    fetchProjects(newId);
+  };
 
   return (
     <div className="mx-auto max-w-6xl p-8">
@@ -123,7 +134,22 @@ export function ProjectDashboard() {
           {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
         </Button>
       </Row>
-      <Tabs items={tabItems} defaultValue={selectedProjectId} onValueChange={handleTabChange} />
+
+      {projects.length === 0 ? (
+        <div className="border-border-base bg-bg-muted/30 flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-20">
+          <Text muted className="mb-4">
+            No projects found. Create your first project to get started.
+          </Text>
+          <CreateProjectDialog onProjectCreated={handleProjectCreated} />
+        </div>
+      ) : (
+        <Tabs
+          items={tabItems}
+          value={selectedProjectId}
+          onValueChange={handleTabChange}
+          headerExtra={<CreateProjectDialog onProjectCreated={handleProjectCreated} />}
+        />
+      )}
     </div>
   );
 }

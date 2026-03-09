@@ -8,9 +8,10 @@ interface InputProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   type?: 'text' | 'number' | 'email' | 'password';
+  autoFocus?: boolean;
 }
 
-export function Input({ value, onValueChange, placeholder, type = 'text' }: InputProps) {
+export function Input({ value, onValueChange, placeholder, type = 'text', autoFocus }: InputProps) {
   return (
     <input
       type={type}
@@ -18,6 +19,7 @@ export function Input({ value, onValueChange, placeholder, type = 'text' }: Inpu
       value={value}
       onInput={(e) => onValueChange((e.target as HTMLInputElement).value)}
       placeholder={placeholder}
+      autoFocus={autoFocus}
     />
   );
 }
