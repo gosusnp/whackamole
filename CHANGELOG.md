@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.8](https://github.com/gosusnp/whackamole/compare/v0.0.7...v0.0.8) (2026-03-09)
+
+
+### Features
+
+* bolder task type color coding in the UI ([f6c0903](https://github.com/gosusnp/whackamole/commit/f6c0903a0adc693da2fe26052088936cfdad1287))
+* **ui:** add project add button ([f9012f8](https://github.com/gosusnp/whackamole/commit/f9012f86c94826cc4c0e5d70e40ec66e7319fda0))
+* **ui:** enable project delete ([09cf1a3](https://github.com/gosusnp/whackamole/commit/09cf1a3c0ad730e0303e33947fd4c842f97a4868))
+* **ui:** style the statuses ([5058254](https://github.com/gosusnp/whackamole/commit/5058254a3bffae48082d6ec928402de15fff5ea8))
+
+
+### Bug Fixes
+
+* **ui:** fype type picker zIndex and color ([a6febc1](https://github.com/gosusnp/whackamole/commit/a6febc18b999de04df9456e375dce45efe7961fb))
+
 ## [0.0.7](https://github.com/gosusnp/whackamole/compare/v0.0.6...v0.0.7) (2026-03-07)
 
 
