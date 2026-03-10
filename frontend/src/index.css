@@ -173,6 +173,12 @@
   .card-title { @apply text-lg font-bold text-text-base truncate; }
   .card-footer { @apply relative z-20 mt-4 pt-4 border-t border-border-base; }
 
+  .card-description-container { @apply relative; }
+  .card-description-collapsed { @apply line-clamp-5 overflow-hidden; }
+  .card-description-fade {
+    @apply absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-bg-surface to-transparent pointer-events-none;
+  }
+
   /* Interaction: Tabs */
   .tabs-root { @apply flex flex-col w-full; }
   .tabs-list { @apply flex border-b border-border-base gap-1 mb-6; }

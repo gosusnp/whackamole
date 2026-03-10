@@ -59,10 +59,43 @@ describe('TaskItem', () => {
     expect(screen.getByText('No description provided.')).toBeInTheDocument();
   });
 
-  it('shows the edit and delete buttons', () => {
+  it('shows the edit and delete buttons, but not expand if no overflow', () => {
     render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: 'Expand description' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Edit task' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Delete task' })).toBeInTheDocument();
+  });
+
+  it('toggles expand/collapse when button is clicked (with overflow)', async () => {
+    // Mock scrollHeight to be larger than clientHeight
+    vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(200);
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(100);
+
+    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+
+    // Use waitFor because overflow detection happens in useEffect
+    const expandButton = await screen.findByRole('button', { name: 'Expand description' });
+
+    // Check initial state (collapsed)
+    const descriptionContainer = screen.getByTestId('markdown').parentElement;
+    expect(descriptionContainer).toHaveClass('card-description-collapsed');
+
+    // Click expand
+    fireEvent.click(expandButton);
+    expect(await screen.findByRole('button', { name: 'Collapse description' })).toBeInTheDocument();
+    expect(descriptionContainer).not.toHaveClass('card-description-collapsed');
+
+    // Click collapse
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse description' }));
+    expect(await screen.findByRole('button', { name: 'Expand description' })).toBeInTheDocument();
+    expect(descriptionContainer).toHaveClass('card-description-collapsed');
+
+    vi.restoreAllMocks();
+  });
+  it('does not show expand button when description is empty', () => {
+    const task = { ...mockTask, description: '' };
+    render(<TaskItem task={task} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: 'Expand description' })).toBeNull();
   });
 
   it('enters edit mode when edit button is clicked', () => {

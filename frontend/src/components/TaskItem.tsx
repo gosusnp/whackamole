@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useState, useCallback } from 'preact/hooks';
+import { useState, useCallback, useRef, useEffect } from 'preact/hooks';
 import { memo } from 'preact/compat';
 import { Card } from './ui/Card';
 import { Text } from './ui/Text';
@@ -16,7 +16,7 @@ import { Markdown } from './ui/Markdown';
 import { TaskStatusBadge } from './TaskStatusBadge';
 import { TaskTypeBadge } from './TaskTypeBadge';
 import { DeletionProgressBar } from './DeletionProgressBar';
-import { Edit2, Save, X, Trash2, Undo2 } from 'lucide-preact';
+import { Edit2, Save, X, Trash2, Undo2, ChevronDown, ChevronUp } from 'lucide-preact';
 import type { Task } from '../types';
 
 interface TaskItemProps {
@@ -28,10 +28,20 @@ interface TaskItemProps {
 export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [name, setName] = useState(task.name);
   const [description, setDescription] = useState(task.description || '');
   const [isSaving, setIsSaving] = useState(false);
   const [nameError, setNameError] = useState('');
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (descriptionRef.current && !isEditing) {
+      const { scrollHeight, clientHeight } = descriptionRef.current;
+      setHasOverflow(scrollHeight > clientHeight);
+    }
+  }, [task.description, isEditing, isExpanded]);
 
   const handleSave = async () => {
     if (description === (task.description || '') && name === task.name) {
@@ -183,6 +193,15 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
               </>
             ) : (
               <>
+                {task.description && (hasOverflow || isExpanded) && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    aria-label={isExpanded ? 'Collapse description' : 'Expand description'}
+                  >
+                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </Button>
+                )}
                 <Button variant="ghost" onClick={() => setIsEditing(true)} aria-label="Edit task">
                   <Edit2 size={14} />
                 </Button>
@@ -208,7 +227,12 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
               placeholder="Add description..."
             />
           ) : task.description ? (
-            <Markdown content={task.description} />
+            <div className="card-description-container">
+              <div ref={descriptionRef} className={!isExpanded ? 'card-description-collapsed' : ''}>
+                <Markdown content={task.description} />
+              </div>
+              {!isExpanded && hasOverflow && <div className="card-description-fade" />}
+            </div>
           ) : (
             <Text muted>No description provided.</Text>
           )}
