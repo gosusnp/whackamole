@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0](https://github.com/gosusnp/whackamole/compare/v0.0.8...v0.1.0) (2026-03-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* merge fix type into bug for a cleare typing
+
+### Features
+
+* add a review status ([375e16b](https://github.com/gosusnp/whackamole/commit/375e16b82983316eafc75c31d6a4160e4c6e3fa4))
+* add project key validation ([5f33422](https://github.com/gosusnp/whackamole/commit/5f33422ca6ecbecb446c8fe4d72ecbc21caee597))
+* add support for configurable MCP.instructions ([8999156](https://github.com/gosusnp/whackamole/commit/89991562617b34f80159f2c33ceb9c67807e7c72))
+* merge fix type into bug for a cleare typing ([e490110](https://github.com/gosusnp/whackamole/commit/e490110cda87d0eebc6a16f50ac6d3bf76399d16))
+
 ## [0.0.8](https://github.com/gosusnp/whackamole/compare/v0.0.7...v0.0.8) (2026-03-09)
 
 
