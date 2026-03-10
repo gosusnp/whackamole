@@ -54,6 +54,7 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 
 	registerProjectHandlers(mux, database)
 	registerTaskHandlers(mux, database)
+	registerConfigHandlers(mux, database)
 
 	// Static File Server
 	mux.Handle("/", http.FileServer(http.FS(sub)))
@@ -272,6 +273,42 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 		}
 		store := db.NewTaskStore(database)
 		if err := store.Delete(types.TaskID(id)); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+}
+
+func registerConfigHandlers(mux *http.ServeMux, database *sql.DB) {
+	mux.HandleFunc("GET /api/configs", func(w http.ResponseWriter, r *http.Request) {
+		store := db.NewConfigStore(database)
+		configs, err := store.GetConfigs()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(configs); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
+	mux.HandleFunc("POST /api/configs", func(w http.ResponseWriter, r *http.Request) {
+		var c types.GlobalConfig
+		if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if !c.Key.IsValid() {
+			http.Error(w, fmt.Sprintf("invalid config key: %s", c.Key), http.StatusBadRequest)
+			return
+		}
+
+		store := db.NewConfigStore(database)
+		err := store.UpdateConfig(c.Key, c.Value)
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

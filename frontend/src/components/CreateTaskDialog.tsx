@@ -88,8 +88,8 @@ export function CreateTaskDialog({ projectId, onTaskCreated }: CreateTaskDialogP
         </Button>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Columns vertical>
+      <form onSubmit={handleSubmit}>
+        <Columns vertical gap={4}>
           <Column>
             <Text small bold>
               NAME
@@ -123,18 +123,18 @@ export function CreateTaskDialog({ projectId, onTaskCreated }: CreateTaskDialogP
               rows={4}
             />
           </Column>
+
+          {error && <Text className="text-type-bug text-xs">{error}</Text>}
+
+          <Row justify="end" gap={2}>
+            <Button variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Creating...' : 'Create Task'}
+            </Button>
+          </Row>
         </Columns>
-
-        {error && <Text className="text-type-bug text-xs">{error}</Text>}
-
-        <Row justify="end" gap={2}>
-          <Button variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={submitting}>
-            {submitting ? 'Creating...' : 'Create Task'}
-          </Button>
-        </Row>
       </form>
     </Dialog>
   );

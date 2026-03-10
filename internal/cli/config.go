@@ -7,25 +7,25 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gosusnp/whackamole/internal/db"
+	"github.com/gosusnp/whackamole/internal/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage configuration",
-	Long:  `Manage whack configuration.`,
+	Long:  `Manage whack configuration, both local CLI settings and global database settings.`,
 }
 
-// configShowCmd represents the config show command
 var configShowCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Print the configuration",
-	Long:  `Print the configuration whack is using.`,
+	Short: "Print the CLI configuration",
+	Long:  `Print the CLI configuration whack is using (database path, default project).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Printf("database: %s\n", viper.GetString("database"))
-		cmd.Printf("project: %s\n", viper.GetString("project"))
+		fmt.Fprintf(cmd.OutOrStdout(), "database: %s\n", viper.GetString("database"))
+		fmt.Fprintf(cmd.OutOrStdout(), "project: %s\n", viper.GetString("project"))
 	},
 }
 
@@ -63,8 +63,61 @@ var configSetLocalCmd = &cobra.Command{
 	},
 }
 
+var configSetCmd = &cobra.Command{
+	Use:   "set <key> <value>",
+	Short: "Set a global database configuration value",
+	Args:  cobra.ExactArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		key := args[0]
+		value := args[1]
+
+		database, err := db.Open(getDBPath(cmd))
+		if err != nil {
+			return err
+		}
+
+		store := db.NewConfigStore(database)
+		err = store.UpdateConfig(types.GlobalConfigKey(key), value)
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintf(cmd.OutOrStdout(), "Config '%s' set successfully.\n", key)
+		return nil
+	},
+}
+
+var configListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List all global database configurations",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		database, err := db.Open(getDBPath(cmd))
+		if err != nil {
+			return err
+		}
+
+		store := db.NewConfigStore(database)
+		configs, err := store.GetConfigs()
+		if err != nil {
+			return err
+		}
+
+		if len(configs) == 0 {
+			fmt.Fprintln(cmd.OutOrStdout(), "No configurations found.")
+			return nil
+		}
+
+		for _, c := range configs {
+			fmt.Fprintf(cmd.OutOrStdout(), "%s: %s\n", c.Key, c.Value)
+		}
+		return nil
+	},
+}
+
 func init() {
-	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configShowCmd)
 	configCmd.AddCommand(configSetLocalCmd)
+	configCmd.AddCommand(configSetCmd)
+	configCmd.AddCommand(configListCmd)
+	rootCmd.AddCommand(configCmd)
 }

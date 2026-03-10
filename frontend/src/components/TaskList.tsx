@@ -66,7 +66,7 @@ export function TaskList({ projectId }: TaskListProps) {
   if (error) return <Text muted>{error}</Text>;
 
   return (
-    <div className="space-y-6">
+    <Columns vertical gap={6}>
       <Row justify="between" items="center">
         <Heading level={2} noMargin>
           Tasks ({tasks.length})
@@ -77,7 +77,7 @@ export function TaskList({ projectId }: TaskListProps) {
       {tasks.length === 0 ? (
         <Text muted>No tasks found.</Text>
       ) : (
-        <Columns vertical>
+        <Columns vertical gap={4}>
           {tasks.map((task) => (
             <Column key={task.id}>
               <TaskItem task={task} onUpdate={handleUpdate} onDelete={handleDelete} />
@@ -85,6 +85,6 @@ export function TaskList({ projectId }: TaskListProps) {
           ))}
         </Columns>
       )}
-    </div>
+    </Columns>
   );
 }

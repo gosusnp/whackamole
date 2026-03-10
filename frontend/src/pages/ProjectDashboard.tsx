@@ -12,6 +12,7 @@ import { Row } from '../components/ui/Row';
 import { Button } from '../components/ui/Button';
 import { CreateProjectDialog } from '../components/CreateProjectDialog';
 import { DeleteProjectDialog } from '../components/DeleteProjectDialog';
+import { ConfigDialog } from '../components/ConfigDialog';
 import { Sun, Moon } from 'lucide-preact';
 
 interface Project {
@@ -138,7 +139,7 @@ export function ProjectDashboard() {
   return (
     <div className="mx-auto max-w-6xl p-8">
       <Row justify="between" items="center" className="mb-8">
-        <Row items="center" gap={4}>
+        <Row items="center" gap={4} fullWidth={false}>
           <img
             src="/favicon.png"
             alt=""
@@ -149,9 +150,13 @@ export function ProjectDashboard() {
             whackAmole
           </Heading>
         </Row>
-        <Button variant="ghost" onClick={toggleTheme} aria-label="Toggle theme">
-          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-        </Button>
+        <div className="flex-1" />
+        <Row items="center" gap={2} fullWidth={false}>
+          <ConfigDialog />
+          <Button variant="ghost" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          </Button>
+        </Row>
       </Row>
 
       {projects.length === 0 ? (

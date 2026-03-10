@@ -8,13 +8,25 @@ import type { ComponentChildren } from 'preact';
 interface ColumnsProps {
   children: ComponentChildren;
   vertical?: boolean;
+  gap?: 2 | 4 | 6 | 8;
+  fullWidth?: boolean;
   className?: string;
 }
 
-export function Columns({ children, vertical = false, className: extraClassName }: ColumnsProps) {
+const gapMap = { 2: 'gap-2', 4: 'gap-4', 6: 'gap-6', 8: 'gap-8' } as const;
+
+export function Columns({
+  children,
+  vertical = false,
+  gap = 6,
+  fullWidth = true,
+  className: extraClassName,
+}: ColumnsProps) {
   const baseClassName = vertical ? 'layout-columns layout-columns-vertical' : 'layout-columns';
-  const fullClassName = extraClassName ? `${baseClassName} ${extraClassName}` : baseClassName;
-  return <div className={fullClassName}>{children}</div>;
+  let fullClassName = `${baseClassName} ${gapMap[gap]} ${extraClassName || ''}`;
+  if (fullWidth) fullClassName += ' w-full';
+
+  return <div className={fullClassName.trim()}>{children}</div>;
 }
 
 interface ColumnProps {

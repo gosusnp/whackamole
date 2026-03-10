@@ -41,6 +41,10 @@ vi.mock('../components/ui/Tabs', () => ({
 vi.mock('../components/CreateProjectDialog', () => ({
   CreateProjectDialog: () => <div data-testid="create-project-dialog" />,
 }));
+
+vi.mock('../components/ConfigDialog', () => ({
+  ConfigDialog: () => <div data-testid="config-dialog" />,
+}));
 const mockProjects = [
   { id: 1, name: 'Alpha', key: 'alpha' },
   { id: 2, name: 'Beta', key: 'beta' },

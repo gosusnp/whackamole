@@ -118,8 +118,8 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
         </button>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Columns vertical>
+      <form onSubmit={handleSubmit}>
+        <Columns vertical gap={4}>
           <Column>
             <Text small bold>
               PROJECT NAME
@@ -144,18 +144,18 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
               Used for routing and database lookups. Must be slug-like.
             </Text>
           </Column>
+
+          {error && <Text className="text-type-bug text-xs">{error}</Text>}
+
+          <Row justify="end" gap={2}>
+            <Button variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Creating...' : 'Create Project'}
+            </Button>
+          </Row>
         </Columns>
-
-        {error && <Text className="text-type-bug text-xs">{error}</Text>}
-
-        <Row justify="end" gap={2}>
-          <Button variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={submitting}>
-            {submitting ? 'Creating...' : 'Create Project'}
-          </Button>
-        </Row>
       </form>
     </Dialog>
   );

@@ -20,3 +20,10 @@ export interface Task {
   type: TaskType;
   status: TaskStatus;
 }
+
+export type GlobalConfigKey = 'mcp_instructions';
+
+export interface GlobalConfig {
+  key: GlobalConfigKey;
+  value: string;
+}

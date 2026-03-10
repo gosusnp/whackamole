@@ -38,16 +38,25 @@ func startMCPServer(cmd *cobra.Command) error {
 }
 
 func createMCPServer(path string) (*server.MCPServer, error) {
-	s := server.NewMCPServer(
-		"whackAmole",
-		internal.Version,
-		server.WithLogging(),
-	)
-
 	database, err := db.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
+
+	configStore := db.NewConfigStore(database)
+	config, _ := configStore.GetConfig(types.ConfigKeyMCPInstructions)
+
+	var options []server.ServerOption
+	options = append(options, server.WithLogging())
+	if config != nil && config.Value != "" {
+		options = append(options, server.WithInstructions(config.Value))
+	}
+
+	s := server.NewMCPServer(
+		"whackAmole",
+		internal.Version,
+		options...,
+	)
 
 	taskStore := db.NewTaskStore(database)
 	projectStore := db.NewProjectStore(database)

@@ -10,6 +10,7 @@ interface RowProps {
   justify?: 'start' | 'center' | 'end' | 'between';
   items?: 'start' | 'center' | 'end' | 'baseline';
   gap?: 2 | 4 | 6 | 8;
+  fullWidth?: boolean;
   className?: string;
 }
 
@@ -32,10 +33,12 @@ export function Row({
   justify = 'start',
   items = 'center',
   gap = 4,
+  fullWidth = true,
   className: extraClassName,
 }: RowProps) {
   const baseClassName = `layout-row ${justifyMap[justify]} ${itemsMap[items]} ${gapMap[gap]}`;
-  const fullClassName = extraClassName ? `${baseClassName} ${extraClassName}` : baseClassName;
+  let fullClassName = extraClassName ? `${baseClassName} ${extraClassName}` : baseClassName;
+  if (fullWidth) fullClassName += ' w-full';
 
   return <div className={fullClassName}>{children}</div>;
 }

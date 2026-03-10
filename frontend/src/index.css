@@ -145,10 +145,10 @@
   }
 
   /* Layout: Columns/Rows */
-  .layout-columns { @apply flex flex-row gap-6 w-full; }
+  .layout-columns { @apply flex flex-row gap-6; }
   .layout-columns-vertical { @apply flex-col; }
   .column-flex { @apply flex-1 min-w-0; }
-  .layout-row { @apply flex flex-row w-full; }
+  .layout-row { @apply flex flex-row; }
 
   /* Container: Cards */
   .card-base { 

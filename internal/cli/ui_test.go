@@ -6,6 +6,7 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -34,6 +35,16 @@ func TestUIAPI(t *testing.T) {
 
 	server := httptest.NewServer(handler)
 	defer server.Close()
+
+	t.Run("ConfigEmpty", func(t *testing.T) {
+		resp, err := http.Get(server.URL + "/api/configs")
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		body, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Equal(t, "[]\n", string(body))
+	})
 
 	t.Run("StaticFiles", func(t *testing.T) {
 		resp, err := http.Get(server.URL + "/")
@@ -183,5 +194,34 @@ func TestUIAPI(t *testing.T) {
 		resp, err = http.Get(server.URL + "/api/projects/1")
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("ConfigHandlers", func(t *testing.T) {
+		// Update config
+		c := types.GlobalConfig{Key: types.ConfigKeyMCPInstructions, Value: "Test Value"}
+		body, _ := json.Marshal(c)
+		resp, err := http.Post(server.URL+"/api/configs", "application/json", bytes.NewBuffer(body))
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+
+		// List configs
+		resp, err = http.Get(server.URL + "/api/configs")
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var configs []types.GlobalConfig
+		err = json.NewDecoder(resp.Body).Decode(&configs)
+		require.NoError(t, err)
+		assert.NotEmpty(t, configs)
+		assert.Equal(t, types.ConfigKeyMCPInstructions, configs[0].Key)
+		assert.Equal(t, "Test Value", configs[0].Value)
+	})
+
+	t.Run("InvalidConfigKey", func(t *testing.T) {
+		c := types.GlobalConfig{Key: "malicious_key", Value: "Some Value"}
+		body, _ := json.Marshal(c)
+		resp, err := http.Post(server.URL+"/api/configs", "application/json", bytes.NewBuffer(body))
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	})
 }
