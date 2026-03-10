@@ -37,6 +37,17 @@ func TestProjectCommands(t *testing.T) {
 		assert.Contains(t, b.String(), "Project created: Test Project (p1)\n")
 	})
 
+	t.Run("AddInvalidKey", func(t *testing.T) {
+		b := bytes.NewBufferString("")
+		rootCmd.SetOut(b)
+		rootCmd.SetErr(b)
+		rootCmd.SetArgs([]string{"project", "add", "Test Project 2", "-k", "Invalid Key"})
+
+		err := rootCmd.Execute()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "must be lowercase, alphanumeric, and may contain dashes")
+	})
+
 	t.Run("List", func(t *testing.T) {
 		b := bytes.NewBufferString("")
 		rootCmd.SetOut(b)

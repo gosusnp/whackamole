@@ -68,6 +68,14 @@ func (s *ProjectStoreTestSuite) TestCreateValidation() {
 
 	_, err = s.store.Create("   ", "p1")
 	s.Error(err)
+
+	// Test invalid keys
+	_, err = s.store.Create("Project", "Invalid Key")
+	s.Error(err)
+	s.Contains(err.Error(), "must be lowercase, alphanumeric, and may contain dashes")
+
+	_, err = s.store.Create("Project", "project!")
+	s.Error(err)
 }
 
 func (s *ProjectStoreTestSuite) TestUpdateValidation() {
@@ -79,6 +87,11 @@ func (s *ProjectStoreTestSuite) TestUpdateValidation() {
 	_, err = s.store.Update(p.ID, "Valid Name", "")
 	s.Error(err)
 	s.Contains(err.Error(), "cannot be empty")
+
+	// Test invalid keys
+	_, err = s.store.Update(p.ID, "Valid Name", "Invalid Key")
+	s.Error(err)
+	s.Contains(err.Error(), "must be lowercase, alphanumeric, and may contain dashes")
 }
 
 func (s *ProjectStoreTestSuite) TestGet() {

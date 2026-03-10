@@ -31,6 +31,10 @@ func (s *ProjectStore) Create(name string, key types.ProjectKey) (*types.Project
 		key = types.ProjectKey(slugify(name))
 	}
 
+	if err := key.Validate(); err != nil {
+		return nil, err
+	}
+
 	res, err := s.db.Exec("INSERT INTO projects (name, key) VALUES (?, ?)", name, key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create project: %w", err)
@@ -100,8 +104,8 @@ func (s *ProjectStore) Update(id types.ProjectID, name string, key types.Project
 	}
 
 	key = types.ProjectKey(strings.TrimSpace(string(key)))
-	if key == "" {
-		return nil, fmt.Errorf("project key cannot be empty")
+	if err := key.Validate(); err != nil {
+		return nil, err
 	}
 
 	_, err := s.db.Exec("UPDATE projects SET name = ?, key = ? WHERE id = ?", name, key, id)
