@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/preact';
 import { TaskList } from './TaskList';
+import { HeaderProvider } from '../HeaderContext';
 import type { Task } from '../types';
 
 // Use standard mocks for unit tests
@@ -63,7 +64,11 @@ describe('TaskList', () => {
 
   it('shows loading state initially', () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
-    render(<TaskList projectId={1} />);
+    render(
+      <HeaderProvider>
+        <TaskList projectId={1} />
+      </HeaderProvider>,
+    );
     expect(screen.getByText('Loading tasks...')).toBeInTheDocument();
   });
 
@@ -73,7 +78,11 @@ describe('TaskList', () => {
       json: () => Promise.resolve(mockTasks),
     });
 
-    render(<TaskList projectId={1} />);
+    render(
+      <HeaderProvider>
+        <TaskList projectId={1} />
+      </HeaderProvider>,
+    );
 
     await waitFor(() => {
       expect(screen.getByText('First task')).toBeInTheDocument();
@@ -87,7 +96,11 @@ describe('TaskList', () => {
       json: () => Promise.resolve([]),
     });
 
-    render(<TaskList projectId={1} />);
+    render(
+      <HeaderProvider>
+        <TaskList projectId={1} />
+      </HeaderProvider>,
+    );
 
     await waitFor(() => {
       expect(screen.getByText('No tasks found.')).toBeInTheDocument();
@@ -97,7 +110,11 @@ describe('TaskList', () => {
   it('shows error state when fetch rejects', async () => {
     mockFetch.mockRejectedValue(new Error('Network error'));
 
-    render(<TaskList projectId={1} />);
+    render(
+      <HeaderProvider>
+        <TaskList projectId={1} />
+      </HeaderProvider>,
+    );
 
     expect(await screen.findByText(/failed to load/i)).toBeInTheDocument();
   });
@@ -105,7 +122,11 @@ describe('TaskList', () => {
   it('shows error when response is not ok', async () => {
     mockFetch.mockResolvedValue({ ok: false });
 
-    render(<TaskList projectId={1} />);
+    render(
+      <HeaderProvider>
+        <TaskList projectId={1} />
+      </HeaderProvider>,
+    );
 
     expect(await screen.findByText(/failed to load/i)).toBeInTheDocument();
   });
@@ -116,7 +137,11 @@ describe('TaskList', () => {
       json: () => Promise.resolve([]),
     });
 
-    render(<TaskList projectId={42} />);
+    render(
+      <HeaderProvider>
+        <TaskList projectId={42} />
+      </HeaderProvider>,
+    );
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -132,10 +157,18 @@ describe('TaskList', () => {
       json: () => Promise.resolve([]),
     });
 
-    const { rerender } = render(<TaskList projectId={1} />);
+    const { rerender } = render(
+      <HeaderProvider>
+        <TaskList projectId={1} />
+      </HeaderProvider>,
+    );
     await waitFor(() => screen.getByText('No tasks found.'));
 
-    rerender(<TaskList projectId={2} />);
+    rerender(
+      <HeaderProvider>
+        <TaskList projectId={2} />
+      </HeaderProvider>,
+    );
     await waitFor(() => {
       expect(mockFetch).toHaveBeenLastCalledWith(
         '/api/tasks?projectId=2',
@@ -150,7 +183,11 @@ describe('TaskList', () => {
       json: () => Promise.resolve(mockTasks),
     });
 
-    render(<TaskList projectId={1} />);
+    render(
+      <HeaderProvider>
+        <TaskList projectId={1} />
+      </HeaderProvider>,
+    );
     await waitFor(() => screen.getByTestId('create-task-trigger'));
 
     mockFetch.mockClear();
@@ -178,7 +215,11 @@ describe('TaskList', () => {
         return Promise.resolve({ ok: true });
       });
 
-      render(<TaskList projectId={1} />);
+      render(
+        <HeaderProvider>
+          <TaskList projectId={1} />
+        </HeaderProvider>,
+      );
       await waitFor(() => screen.getByText('First task'));
 
       // 1. Start deleting Task 1 at t=0

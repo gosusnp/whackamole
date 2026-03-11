@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/preact';
 import { TaskItem } from './TaskItem';
+import { HeaderProvider } from '../HeaderContext';
 import type { Task } from '../types';
 
 vi.mock('./TaskStatusBadge', () => ({
@@ -44,23 +45,39 @@ describe('TaskItem', () => {
   });
 
   it('renders the task name', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     expect(screen.getByText('Test task')).toBeInTheDocument();
   });
 
   it('renders the task description', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     expect(screen.getByTestId('markdown')).toHaveTextContent('Some description');
   });
 
   it('shows placeholder when description is empty', () => {
     const task = { ...mockTask, description: '' };
-    render(<TaskItem task={task} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={task} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     expect(screen.getByText('No description provided.')).toBeInTheDocument();
   });
 
   it('shows the edit and delete buttons, but not expand if no overflow', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     expect(screen.queryByRole('button', { name: 'Expand description' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Edit task' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Delete task' })).toBeInTheDocument();
@@ -71,7 +88,11 @@ describe('TaskItem', () => {
     vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(200);
     vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(100);
 
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
 
     // Use waitFor because overflow detection happens in useEffect
     const expandButton = await screen.findByRole('button', { name: 'Expand description' });
@@ -94,26 +115,42 @@ describe('TaskItem', () => {
   });
   it('does not show expand button when description is empty', () => {
     const task = { ...mockTask, description: '' };
-    render(<TaskItem task={task} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={task} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     expect(screen.queryByRole('button', { name: 'Expand description' })).toBeNull();
   });
 
   it('enters edit mode when edit button is clicked', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
     expect(screen.getByDisplayValue('Test task')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Some description')).toBeInTheDocument();
   });
 
   it('shows save and cancel buttons in edit mode', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
     expect(screen.getByRole('button', { name: 'Save task' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel edit' })).toBeInTheDocument();
   });
 
   it('restores original values and exits edit mode on cancel', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
 
     fireEvent.input(screen.getByDisplayValue('Test task'), { target: { value: 'Changed name' } });
@@ -125,7 +162,11 @@ describe('TaskItem', () => {
 
   it('calls fetch and onUpdate when saved with changes', async () => {
     const onUpdate = vi.fn();
-    render(<TaskItem task={mockTask} onUpdate={onUpdate} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={onUpdate} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
 
     fireEvent.input(screen.getByDisplayValue('Test task'), { target: { value: 'Updated name' } });
@@ -157,7 +198,11 @@ describe('TaskItem', () => {
   });
 
   it('does not call fetch when saved with no changes', async () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
 
@@ -167,7 +212,11 @@ describe('TaskItem', () => {
   });
 
   it('shows inline validation error when name is cleared', () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
 
     fireEvent.input(screen.getByDisplayValue('Test task'), { target: { value: '   ' } });
@@ -178,7 +227,11 @@ describe('TaskItem', () => {
   });
 
   it('exits edit mode after successful save', async () => {
-    render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+    render(
+      <HeaderProvider>
+        <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </HeaderProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Edit task' }));
 
     fireEvent.input(screen.getByDisplayValue('Test task'), { target: { value: 'New name' } });
@@ -199,7 +252,11 @@ describe('TaskItem', () => {
     });
 
     it('shows undo button and progress bar when delete is clicked', () => {
-      render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+      render(
+        <HeaderProvider>
+          <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+        </HeaderProvider>,
+      );
       fireEvent.click(screen.getByRole('button', { name: 'Delete task' }));
 
       expect(screen.getByRole('button', { name: 'Undo delete' })).toBeInTheDocument();
@@ -207,7 +264,11 @@ describe('TaskItem', () => {
     });
 
     it('cancels deletion when undo is clicked', () => {
-      render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />);
+      render(
+        <HeaderProvider>
+          <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+        </HeaderProvider>,
+      );
       fireEvent.click(screen.getByRole('button', { name: 'Delete task' }));
       fireEvent.click(screen.getByRole('button', { name: 'Undo delete' }));
 
@@ -218,7 +279,11 @@ describe('TaskItem', () => {
 
     it('commits deletion after 10 seconds', async () => {
       const onDelete = vi.fn();
-      render(<TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={onDelete} />);
+      render(
+        <HeaderProvider>
+          <TaskItem task={mockTask} onUpdate={vi.fn()} onDelete={onDelete} />
+        </HeaderProvider>,
+      );
 
       // Start deletion
       fireEvent.click(screen.getByRole('button', { name: 'Delete task' }));
@@ -250,7 +315,9 @@ describe('TaskItem', () => {
     it('applies recession class for completed tasks', () => {
       const completedTask = { ...mockTask, status: 'completed' as const };
       const { container } = render(
-        <TaskItem task={completedTask} onUpdate={vi.fn()} onDelete={vi.fn()} />,
+        <HeaderProvider>
+          <TaskItem task={completedTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+        </HeaderProvider>,
       );
       // The Card component applies classes to the outer div
       expect(container.firstChild).toHaveClass('card-recession');
@@ -259,7 +326,9 @@ describe('TaskItem', () => {
     it('applies recession class for closed tasks', () => {
       const closedTask = { ...mockTask, status: 'closed' as const };
       const { container } = render(
-        <TaskItem task={closedTask} onUpdate={vi.fn()} onDelete={vi.fn()} />,
+        <HeaderProvider>
+          <TaskItem task={closedTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+        </HeaderProvider>,
       );
       expect(container.firstChild).toHaveClass('card-recession');
     });
@@ -267,7 +336,9 @@ describe('TaskItem', () => {
     it('does not apply recession class for active tasks', () => {
       const activeTask = { ...mockTask, status: 'inProgress' as const };
       const { container } = render(
-        <TaskItem task={activeTask} onUpdate={vi.fn()} onDelete={vi.fn()} />,
+        <HeaderProvider>
+          <TaskItem task={activeTask} onUpdate={vi.fn()} onDelete={vi.fn()} />
+        </HeaderProvider>,
       );
       expect(container.firstChild).not.toHaveClass('card-recession');
     });

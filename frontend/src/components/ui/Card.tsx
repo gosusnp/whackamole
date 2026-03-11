@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+import { forwardRef } from 'preact/compat';
 import type { ComponentChildren } from 'preact';
 
 interface CardProps {
@@ -12,19 +13,21 @@ interface CardProps {
   className?: string;
 }
 
-export function Card({ children, title, footer, className: extraClassName }: CardProps) {
-  const baseClassName = 'card-base';
-  const fullClassName = extraClassName ? `${baseClassName} ${extraClassName}` : baseClassName;
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ children, title, footer, className: extraClassName }, ref) => {
+    const baseClassName = 'card-base';
+    const fullClassName = extraClassName ? `${baseClassName} ${extraClassName}` : baseClassName;
 
-  return (
-    <div className={fullClassName}>
-      {title && (
-        <div className="card-header">
-          {typeof title === 'string' ? <h3 className="card-title">{title}</h3> : title}
-        </div>
-      )}
-      <div className="card-content">{children}</div>
-      {footer && <div className="card-footer">{footer}</div>}
-    </div>
-  );
-}
+    return (
+      <div className={fullClassName} ref={ref}>
+        {title && (
+          <div className="card-header">
+            {typeof title === 'string' ? <h3 className="card-title">{title}</h3> : title}
+          </div>
+        )}
+        <div className="card-content">{children}</div>
+        {footer && <div className="card-footer">{footer}</div>}
+      </div>
+    );
+  },
+);

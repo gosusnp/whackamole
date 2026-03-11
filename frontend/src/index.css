@@ -145,10 +145,11 @@
   }
 
   /* Layout: Columns/Rows */
-  .layout-columns { @apply flex flex-row gap-6; }
-  .layout-columns-vertical { @apply flex-col; }
+  .layout-columns { @apply flex flex-row gap-6 items-stretch; }
+  .layout-columns-vertical { @apply flex-col items-stretch; }
   .column-flex { @apply flex-1 min-w-0; }
-  .layout-row { @apply flex flex-row; }
+  .layout-row { @apply flex flex-row items-center; }
+  .layout-row.w-full { @apply w-full; }
 
   /* Container: Cards */
   .card-base { 
@@ -182,6 +183,7 @@
   /* Interaction: Tabs */
   .tabs-root { @apply flex flex-col w-full; }
   .tabs-list { @apply flex border-b border-border-base gap-1 mb-6; }
+  .tabs-list-no-margin { @apply mb-0; }
   .tabs-trigger {
     @apply flex items-center px-4 py-2 text-sm font-bold text-text-muted border-b-2 border-transparent transition-all duration-150;
     @apply hover:text-text-base;
@@ -303,6 +305,14 @@
   .badge-status-blocked { @apply text-status-blocked border-status-blocked/30 hover:bg-status-blocked/10; }
   .badge-status-completed { @apply text-status-completed border-status-completed/30 hover:bg-status-completed/10; }
   .badge-status-closed { @apply text-status-closed border-status-closed/30 hover:bg-status-closed/10; }
+
+  /* Condensed Header Helpers */
+  .header-condensed .tabs-list {
+    @apply border-none mb-0;
+  }
+  .header-condensed .tabs-extra {
+    @apply hidden;
+  }
 }
 
 :root {
@@ -326,7 +336,6 @@ pre, code, .text-mono {
   70% { background-color: var(--type-bug); }
   100% { transform: scaleX(0); background-color: var(--type-bug); }
 }
-
 .animate-deletion {
   animation: deletion-progress 10s linear forwards;
   transform-origin: left;

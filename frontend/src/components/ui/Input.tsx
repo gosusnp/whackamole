@@ -9,13 +9,24 @@ interface InputProps {
   placeholder?: string;
   type?: 'text' | 'number' | 'email' | 'password';
   autoFocus?: boolean;
+  className?: string;
 }
 
-export function Input({ value, onValueChange, placeholder, type = 'text', autoFocus }: InputProps) {
+export function Input({
+  value,
+  onValueChange,
+  placeholder,
+  type = 'text',
+  autoFocus,
+  className = '',
+}: InputProps) {
+  const baseClassName = 'input-base';
+  const fullClassName = className ? `${baseClassName} ${className}` : baseClassName;
+
   return (
     <input
       type={type}
-      className="input-base"
+      className={fullClassName}
       value={value}
       onInput={(e) => onValueChange((e.target as HTMLInputElement).value)}
       placeholder={placeholder}

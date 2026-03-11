@@ -8,12 +8,22 @@ interface TextAreaProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   rows?: number;
+  className?: string;
 }
 
-export function TextArea({ value, onValueChange, placeholder, rows = 4 }: TextAreaProps) {
+export function TextArea({
+  value,
+  onValueChange,
+  placeholder,
+  rows = 4,
+  className = '',
+}: TextAreaProps) {
+  const baseClassName = 'textarea-base';
+  const fullClassName = className ? `${baseClassName} ${className}` : baseClassName;
+
   return (
     <textarea
-      className="textarea-base"
+      className={fullClassName}
       value={value}
       onInput={(e) => onValueChange((e.target as HTMLTextAreaElement).value)}
       placeholder={placeholder}

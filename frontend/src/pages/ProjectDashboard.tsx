@@ -4,16 +4,14 @@
  */
 
 import { useState, useEffect, useCallback } from 'preact/hooks';
-import { Tabs } from '../components/ui/Tabs';
+import * as RadixTabs from '@radix-ui/react-tabs';
 import { TaskList } from '../components/TaskList';
-import { Heading } from '../components/ui/Heading';
 import { Text } from '../components/ui/Text';
-import { Row } from '../components/ui/Row';
-import { Button } from '../components/ui/Button';
+import { StickyHeader } from '../components/StickyHeader';
 import { CreateProjectDialog } from '../components/CreateProjectDialog';
 import { DeleteProjectDialog } from '../components/DeleteProjectDialog';
-import { ConfigDialog } from '../components/ConfigDialog';
-import { Sun, Moon } from 'lucide-preact';
+import { CreateTaskDialog } from '../components/CreateTaskDialog';
+import { useHeader } from '../HeaderContext';
 
 interface Project {
   id: number;
@@ -26,6 +24,7 @@ export function ProjectDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const { isCondensed } = useHeader();
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(
     localStorage.getItem('whack-last-project-id') || undefined,
   );
@@ -119,61 +118,84 @@ export function ProjectDashboard() {
     fetchProjects();
   };
 
-  const tabItems = projects.map((project) => ({
-    id: String(project.id),
-    label: project.name,
-    content: <TaskList projectId={project.id} />,
-    extra: (
-      <DeleteProjectDialog
-        projectId={project.id}
-        projectName={project.name}
-        onProjectDeleted={handleProjectDeleted}
-      />
-    ),
-  }));
-
   const handleProjectCreated = (newId: string) => {
     fetchProjects(newId);
   };
 
-  return (
-    <div className="mx-auto max-w-6xl p-8">
-      <Row justify="between" items="center" className="mb-8">
-        <Row items="center" gap={4} fullWidth={false}>
-          <img
-            src="/favicon.png"
-            alt=""
-            className="h-8 w-8"
-            style={{ filter: 'var(--logo-filter)' }}
-          />
-          <Heading level={1} noMargin>
-            whackAmole
-          </Heading>
-        </Row>
-        <div className="flex-1" />
-        <Row items="center" gap={2} fullWidth={false}>
-          <ConfigDialog />
-          <Button variant="ghost" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-          </Button>
-        </Row>
-      </Row>
+  const defaultTab = selectedProjectId || (projects[0]?.id ? String(projects[0].id) : undefined);
 
-      {projects.length === 0 ? (
-        <div className="border-border-base bg-bg-muted/30 flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-20">
-          <Text muted className="mb-4">
-            No projects found. Create your first project to get started.
-          </Text>
-          <CreateProjectDialog onProjectCreated={handleProjectCreated} />
-        </div>
-      ) : (
-        <Tabs
-          items={tabItems}
-          value={selectedProjectId}
-          onValueChange={handleTabChange}
-          headerExtra={<CreateProjectDialog onProjectCreated={handleProjectCreated} />}
-        />
-      )}
-    </div>
+  return (
+    <RadixTabs.Root
+      className="tabs-root"
+      value={selectedProjectId}
+      onValueChange={handleTabChange}
+      defaultValue={defaultTab}
+    >
+      <StickyHeader
+        theme={theme}
+        toggleTheme={toggleTheme}
+        headerExtra={
+          selectedProjectId && (
+            <CreateTaskDialog
+              projectId={Number(selectedProjectId)}
+              onTaskCreated={() => {
+                window.dispatchEvent(
+                  new CustomEvent('whack-task-created', {
+                    detail: { projectId: Number(selectedProjectId) },
+                  }),
+                );
+              }}
+            />
+          )
+        }
+        tabsList={
+          <RadixTabs.List
+            className={`tabs-list tabs-list-no-margin ${isCondensed ? 'header-condensed border-none' : ''}`}
+          >
+            {projects.map((project) => (
+              <RadixTabs.Trigger
+                key={project.id}
+                value={String(project.id)}
+                className="tabs-trigger"
+              >
+                {project.name}
+                <DeleteProjectDialog
+                  projectId={project.id}
+                  projectName={project.name}
+                  onProjectDeleted={handleProjectDeleted}
+                />
+              </RadixTabs.Trigger>
+            ))}
+            <div className="flex-1" />
+            {!isCondensed && (
+              <div className="tabs-extra flex items-center px-2">
+                <CreateProjectDialog onProjectCreated={handleProjectCreated} />
+              </div>
+            )}
+          </RadixTabs.List>
+        }
+      />
+
+      <div className="mx-auto w-full max-w-6xl px-8 pb-8">
+        {projects.length === 0 ? (
+          <div className="border-border-base bg-bg-muted/30 flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-20">
+            <Text muted className="mb-4">
+              No projects found. Create your first project to get started.
+            </Text>
+            <CreateProjectDialog onProjectCreated={handleProjectCreated} />
+          </div>
+        ) : (
+          projects.map((project) => (
+            <RadixTabs.Content
+              key={project.id}
+              value={String(project.id)}
+              className="tabs-content w-full outline-none"
+            >
+              <TaskList projectId={project.id} />
+            </RadixTabs.Content>
+          ))
+        )}
+      </div>
+    </RadixTabs.Root>
   );
 }

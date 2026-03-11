@@ -18,6 +18,7 @@ import { TaskTypeBadge } from './TaskTypeBadge';
 import { DeletionProgressBar } from './DeletionProgressBar';
 import { Edit2, Save, X, Trash2, Undo2, ChevronDown, ChevronUp } from 'lucide-preact';
 import type { Task } from '../types';
+import { useHeader } from '../HeaderContext';
 
 interface TaskItemProps {
   task: Task;
@@ -35,6 +36,15 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
   const [nameError, setNameError] = useState('');
   const [hasOverflow, setHasOverflow] = useState(false);
   const descriptionRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const {
+    setPromotedTask,
+    headerHeight,
+    setPromotionHandlers,
+    setIsDeletingPromoted,
+    setOnDeleteCommit,
+    promotedTask,
+  } = useHeader();
 
   useEffect(() => {
     if (descriptionRef.current && !isEditing) {
@@ -42,6 +52,119 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
       setHasOverflow(scrollHeight > clientHeight);
     }
   }, [task.description, isEditing, isExpanded]);
+
+  const handleDeleteStart = useCallback(() => {
+    setIsDeleting(true);
+  }, []);
+
+  const handleEditStart = useCallback(() => {
+    setIsExpanded(true);
+    setIsEditing(true);
+  }, []);
+
+  const handleDeleteCancel = useCallback(() => {
+    setIsDeleting(false);
+  }, []);
+
+  const handleDeleteCommit = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+      if (response.ok) {
+        onDelete(task.id);
+      } else {
+        console.error('Failed to delete task');
+        setIsDeleting(false);
+      }
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      setIsDeleting(false);
+    }
+  }, [task.id, onDelete]);
+
+  // Sync deletion state to header if promoted
+  useEffect(() => {
+    if (promotedTask?.id === task.id) {
+      setIsDeletingPromoted(isDeleting);
+      setOnDeleteCommit(isDeleting ? () => handleDeleteCommit() : undefined);
+    }
+  }, [
+    isDeleting,
+    promotedTask,
+    task.id,
+    setIsDeletingPromoted,
+    setOnDeleteCommit,
+    handleDeleteCommit,
+  ]);
+
+  // Task Promotion Logic
+  useEffect(() => {
+    if (!isExpanded) {
+      // If we were the promoted task, clear it
+      setPromotedTask((prev: Task | null) => {
+        if (prev?.id === task.id) {
+          setPromotionHandlers({});
+          setIsDeletingPromoted(false);
+          setOnDeleteCommit(undefined);
+          return null;
+        }
+        return prev;
+      });
+      return;
+    }
+
+    const handleScroll = () => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+
+      // If the top of the card is above the header height, promote it
+      if (rect.top < headerHeight && rect.bottom > headerHeight) {
+        setPromotedTask(task);
+        setPromotionHandlers({
+          onEdit: handleEditStart,
+          onDelete: handleDeleteStart,
+          onUndo: handleDeleteCancel,
+        });
+      } else {
+        // If it's no longer in that zone, clear it ONLY if it's THIS task
+        setPromotedTask((prev: Task | null) => {
+          if (prev?.id === task.id) {
+            setPromotionHandlers({});
+            setIsDeletingPromoted(false);
+            setOnDeleteCommit(undefined);
+            return null;
+          }
+          return prev;
+        });
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check immediately
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      setPromotedTask((prev: Task | null) => {
+        if (prev?.id === task.id) {
+          setPromotionHandlers({});
+          setIsDeletingPromoted(false);
+          setOnDeleteCommit(undefined);
+          return null;
+        }
+        return prev;
+      });
+    };
+  }, [
+    isExpanded,
+    task,
+    headerHeight,
+    setPromotedTask,
+    setPromotionHandlers,
+    handleEditStart,
+    handleDeleteStart,
+    handleDeleteCancel,
+    setIsDeletingPromoted,
+    setOnDeleteCommit,
+  ]);
 
   const handleSave = async () => {
     if (description === (task.description || '') && name === task.name) {
@@ -83,24 +206,6 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
     }
   };
 
-  const handleDeleteStart = () => setIsDeleting(true);
-  const handleDeleteCancel = () => setIsDeleting(false);
-
-  const handleDeleteCommit = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
-      if (response.ok) {
-        onDelete(task.id);
-      } else {
-        console.error('Failed to delete task');
-        setIsDeleting(false);
-      }
-    } catch (err) {
-      console.error('Error deleting task:', err);
-      setIsDeleting(false);
-    }
-  }, [task.id, onDelete]);
-
   const handleCancel = () => {
     setName(task.name);
     setDescription(task.description || '');
@@ -131,6 +236,7 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
 
   return (
     <Card
+      ref={cardRef}
       title={cardHeader}
       className={`${isDeleting ? 'card-destructive' : ''} ${isTerminal ? 'card-recession' : ''} card-type-container card-type-${task.type}`}
     >
@@ -154,10 +260,15 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
       <div className="flex flex-col gap-4">
         {/* Name Row: Name + Edit/Delete Actions */}
         <Row justify="between" items="start" gap={4}>
-          <div className="flex flex-1 flex-col gap-1">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
             {isEditing ? (
               <>
-                <Input value={name} onValueChange={setName} placeholder="Task name" />
+                <Input
+                  value={name}
+                  onValueChange={setName}
+                  placeholder="Task name"
+                  className="w-full"
+                />
                 {nameError && (
                   <Text small muted>
                     {nameError}
@@ -202,7 +313,7 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
                     {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   </Button>
                 )}
-                <Button variant="ghost" onClick={() => setIsEditing(true)} aria-label="Edit task">
+                <Button variant="ghost" onClick={handleEditStart} aria-label="Edit task">
                   <Edit2 size={14} />
                 </Button>
                 <Button
@@ -219,12 +330,13 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
         </Row>
 
         {/* Description Row */}
-        <div>
+        <div className="min-w-0">
           {isEditing ? (
             <TextArea
               value={description}
               onValueChange={setDescription}
               placeholder="Add description..."
+              className="w-full"
             />
           ) : task.description ? (
             <div className="card-description-container">

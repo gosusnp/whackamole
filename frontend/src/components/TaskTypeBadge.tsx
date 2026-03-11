@@ -10,7 +10,7 @@ import type { Task, TaskType } from '../types';
 
 interface TaskTypeBadgeProps {
   task: Task;
-  onTypeUpdate: (newType: TaskType) => void;
+  onTypeUpdate?: (newType: TaskType) => void;
 }
 
 const TYPE_OPTIONS = [
@@ -26,7 +26,7 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleTypeChange = async (newType: string) => {
-    if (newType === task.type) {
+    if (!onTypeUpdate || newType === task.type) {
       setIsOpen(false);
       return;
     }
@@ -57,16 +57,18 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
     }
   };
 
+  const trigger = (
+    <button className={`btn-ghost badge-${task.type}`} disabled={isUpdating || !onTypeUpdate}>
+      {task.type}
+    </button>
+  );
+
+  if (!onTypeUpdate) {
+    return trigger;
+  }
+
   return (
-    <Popover
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      trigger={
-        <button className={`btn-ghost badge-${task.type}`} disabled={isUpdating}>
-          {task.type}
-        </button>
-      }
-    >
+    <Popover open={isOpen} onOpenChange={setIsOpen} trigger={trigger}>
       <ToggleGroup value={task.type} onValueChange={handleTypeChange} items={TYPE_OPTIONS} />
     </Popover>
   );

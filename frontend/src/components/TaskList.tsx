@@ -11,6 +11,7 @@ import { Heading } from './ui/Heading';
 import { TaskItem } from './TaskItem';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import type { Task } from '../types';
+import { useHeader } from '../HeaderContext';
 
 interface TaskListProps {
   projectId: number;
@@ -20,6 +21,7 @@ export function TaskList({ projectId }: TaskListProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isCondensed } = useHeader();
 
   const fetchTasks = (signal?: AbortSignal) => {
     // We only show loading on initial fetch
@@ -45,7 +47,20 @@ export function TaskList({ projectId }: TaskListProps) {
   useEffect(() => {
     const controller = new AbortController();
     fetchTasks(controller.signal);
-    return () => controller.abort();
+
+    const handleGlobalTaskCreated = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail && detail.projectId === projectId) {
+        fetchTasks();
+      }
+    };
+
+    window.addEventListener('whack-task-created', handleGlobalTaskCreated);
+
+    return () => {
+      controller.abort();
+      window.removeEventListener('whack-task-created', handleGlobalTaskCreated);
+    };
   }, [projectId]);
 
   const handleUpdate = useCallback((taskId: number, updates: Partial<Task>) => {
@@ -71,7 +86,9 @@ export function TaskList({ projectId }: TaskListProps) {
         <Heading level={2} noMargin>
           Tasks ({tasks.length})
         </Heading>
-        <CreateTaskDialog projectId={projectId} onTaskCreated={handleTaskCreated} />
+        {!isCondensed && (
+          <CreateTaskDialog projectId={projectId} onTaskCreated={handleTaskCreated} />
+        )}
       </Row>
 
       {tasks.length === 0 ? (

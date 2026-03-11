@@ -10,7 +10,7 @@ import type { Task, TaskStatus } from '../types';
 
 interface TaskStatusBadgeProps {
   task: Task;
-  onStatusUpdate: (newStatus: TaskStatus) => void;
+  onStatusUpdate?: (newStatus: TaskStatus) => void;
 }
 
 const STATUS_OPTIONS = [
@@ -27,7 +27,7 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
   const [isOpen, setIsOpen] = useState(false);
 
   const handleStatusChange = async (newStatus: string) => {
-    if (newStatus === task.status) {
+    if (!onStatusUpdate || newStatus === task.status) {
       setIsOpen(false);
       return;
     }
@@ -58,16 +58,21 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
     }
   };
 
-  return (
-    <Popover
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      trigger={
-        <button className={`btn-ghost badge-status-${task.status}`} disabled={isUpdating}>
-          {task.status}
-        </button>
-      }
+  const trigger = (
+    <button
+      className={`btn-ghost badge-status-${task.status}`}
+      disabled={isUpdating || !onStatusUpdate}
     >
+      {task.status}
+    </button>
+  );
+
+  if (!onStatusUpdate) {
+    return trigger;
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen} trigger={trigger}>
       <ToggleGroup value={task.status} onValueChange={handleStatusChange} items={STATUS_OPTIONS} />
     </Popover>
   );
