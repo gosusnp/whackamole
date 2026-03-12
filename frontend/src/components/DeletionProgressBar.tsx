@@ -26,7 +26,7 @@ export const DeletionProgressBar = memo(function DeletionProgressBar({
 }: DeletionProgressBarProps) {
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
-  const { getDeletion } = useDeletion();
+  const { getDeletion, subscribe } = useDeletion();
   const getDeletionRef = useRef(getDeletion);
   getDeletionRef.current = getDeletion;
 
@@ -35,36 +35,30 @@ export const DeletionProgressBar = memo(function DeletionProgressBar({
     return Math.max(0, 1 - elapsed / DELETION_DURATION);
   });
 
+  const completedRef = useRef(false);
+
   useEffect(() => {
-    let active = true;
-    const update = () => {
-      if (!active) return;
+    completedRef.current = false;
+
+    return subscribe((now) => {
+      if (completedRef.current) return;
 
       // Check if this task is still being deleted in the global context
       const isStillPending = !!getDeletionRef.current(taskId);
       if (!isStillPending) {
-        active = false;
         return;
       }
 
-      const elapsed = Date.now() - startTime;
+      const elapsed = now - startTime;
       const nextProgress = Math.max(0, 1 - elapsed / DELETION_DURATION);
       setProgress(nextProgress);
 
-      if (nextProgress > 0) {
-        requestAnimationFrame(update);
-      } else {
-        active = false;
+      if (nextProgress <= 0) {
+        completedRef.current = true;
         onCompleteRef.current();
       }
-    };
-
-    const raf = requestAnimationFrame(update);
-    return () => {
-      active = false;
-      cancelAnimationFrame(raf);
-    };
-  }, [startTime, taskId]);
+    });
+  }, [startTime, taskId, subscribe]);
 
   const positionClass = position === 'top' ? 'top-0' : 'bottom-0';
 

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, act } from '@testing-library/preact';
+import { render, act, cleanup } from '@testing-library/preact';
 import { DeletionProgressBar, DELETION_DURATION } from './DeletionProgressBar';
 import { DeletionProvider, useDeletion } from '../contexts/DeletionContext';
 
@@ -34,17 +34,12 @@ const TestWrapper = ({
 
 describe('DeletionProgressBar', () => {
   beforeEach(() => {
+    cleanup();
     vi.useFakeTimers();
-    // Mock requestAnimationFrame for vitest
-    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) =>
-      setTimeout(() => cb(Date.now()), 16),
-    );
-    vi.stubGlobal('cancelAnimationFrame', (id: number) => clearTimeout(id));
   });
 
   afterEach(() => {
     vi.useRealTimers();
-    vi.unstubAllGlobals();
   });
 
   it('calls onComplete after DELETION_DURATION', async () => {

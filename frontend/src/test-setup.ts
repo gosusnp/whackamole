@@ -13,6 +13,15 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) =>
+  setTimeout(() => cb(Date.now()), 16),
+);
+vi.stubGlobal('cancelAnimationFrame', (id: number | undefined) => {
+  if (id !== undefined) {
+    clearTimeout(id);
+  }
+});
+
 vi.stubGlobal(
   'ResizeObserver',
   class {
