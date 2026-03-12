@@ -75,6 +75,10 @@ export function TaskList({ projectId, taskUpdateEvent }: TaskListProps) {
           .catch((err) => console.error('Error fetching updated task:', err));
       } else if (taskUpdateEvent.operation === 'create') {
         setPendingTaskIds((prev) => {
+          // If task is already in the list, don't mark it as pending
+          if (tasks.some((t) => t.id === taskUpdateEvent.taskId)) {
+            return prev;
+          }
           const next = new Set(prev);
           next.add(taskUpdateEvent.taskId);
           return next;
@@ -83,7 +87,7 @@ export function TaskList({ projectId, taskUpdateEvent }: TaskListProps) {
         setTasks((prev) => prev.filter((t) => t.id !== taskUpdateEvent.taskId));
       }
     }
-  }, [taskUpdateEvent, projectId]);
+  }, [taskUpdateEvent, projectId, tasks]);
 
   const handleUpdate = useCallback((taskId: number, updates: Partial<Task>) => {
     setTasks((prevTasks) =>

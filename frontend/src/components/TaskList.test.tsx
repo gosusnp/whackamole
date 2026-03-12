@@ -293,6 +293,55 @@ describe('TaskList', () => {
       });
     });
 
+    it('does NOT show refresh button when a new task is created by current user', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockTasks),
+      });
+
+      const { rerender } = renderTaskList({ projectId: 1, taskUpdateEvent: null });
+      await waitFor(() => screen.getByText('Tasks (2)'));
+
+      // 1. Simulate user creating a task
+      const newTask = {
+        id: 3,
+        name: 'Third',
+        projectId: 1,
+        description: '',
+        type: 'feat',
+        status: 'notStarted',
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([...mockTasks, newTask]),
+      });
+
+      screen.getByTestId('create-task-trigger').click();
+
+      // Wait for the tasks to be updated
+      await waitFor(() => {
+        expect(screen.getByText('Tasks (3)')).toBeInTheDocument();
+        expect(screen.getByText('Third')).toBeInTheDocument();
+      });
+
+      // 2. Simulate the history poller catching that same task creation
+      const createEvent = {
+        projectId: 1,
+        taskId: 3, // Same ID as the one we just created
+        operation: 'create',
+        timestamp: Date.now(),
+      };
+
+      rerender(
+        <DeletionProvider>
+          <TaskList projectId={1} taskUpdateEvent={createEvent} />
+        </DeletionProvider>,
+      );
+
+      // 3. Verify that the refresh button is NOT shown
+      expect(screen.queryByText(/new task available/i)).toBeNull();
+    });
+
     it('updates a task in-place when an update event is received', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
