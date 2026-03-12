@@ -222,4 +222,83 @@ describe('TaskList', () => {
       expect(screen.getByText('Tasks (0)')).toBeInTheDocument();
     });
   });
+
+  describe('History Events', () => {
+    it('shows refresh button when a new task is created', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockTasks),
+      });
+
+      const { rerender } = render(<TaskList projectId={1} taskUpdateEvent={null} />);
+      await waitFor(() => screen.getByText('Tasks (2)'));
+
+      // Simulate a create event for project 1
+      const createEvent = {
+        projectId: 1,
+        taskId: 3,
+        operation: 'create',
+        timestamp: Date.now(),
+      };
+
+      rerender(<TaskList projectId={1} taskUpdateEvent={createEvent} />);
+
+      expect(screen.getByText(/1 new task available. Refresh\?/i)).toBeInTheDocument();
+
+      // Simulate same event again - should still show "1 new task" (deduplication)
+      rerender(
+        <TaskList projectId={1} taskUpdateEvent={{ ...createEvent, timestamp: Date.now() + 1 }} />,
+      );
+      expect(screen.getByText(/1 new task available. Refresh\?/i)).toBeInTheDocument();
+
+      // Click refresh
+      mockFetch.mockClear();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([...mockTasks, { id: 3, name: 'Third', projectId: 1 }]),
+      });
+
+      fireEvent.click(screen.getByText(/Refresh\?/i));
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith('/api/tasks?projectId=1', expect.anything());
+        expect(screen.getByText('Tasks (3)')).toBeInTheDocument();
+        expect(screen.queryByText(/new task available/i)).toBeNull();
+      });
+    });
+
+    it('updates a task in-place when an update event is received', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockTasks),
+      });
+
+      const { rerender } = render(<TaskList projectId={1} taskUpdateEvent={null} />);
+      await waitFor(() => screen.getByText('First task'));
+
+      const updatedTask = { ...mockTasks[0], name: 'Updated First Task' };
+
+      // Mock the fetch for the specific task update
+      mockFetch.mockImplementation((url) => {
+        if (url === '/api/tasks/1') {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(updatedTask) });
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTasks) });
+      });
+
+      const updateEvent = {
+        projectId: 1,
+        taskId: 1,
+        operation: 'update',
+        timestamp: Date.now(),
+      };
+
+      rerender(<TaskList projectId={1} taskUpdateEvent={updateEvent} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Updated First Task')).toBeInTheDocument();
+        expect(screen.queryByText('First task')).toBeNull();
+      });
+    });
+  });
 });

@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gosusnp/whackamole/internal/db"
 	"github.com/gosusnp/whackamole/internal/types"
@@ -55,11 +56,41 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 	registerProjectHandlers(mux, database)
 	registerTaskHandlers(mux, database)
 	registerConfigHandlers(mux, database)
+	registerHistoryHandlers(mux, database)
 
 	// Static File Server
 	mux.Handle("/", http.FileServer(http.FS(sub)))
 
 	return mux, nil
+}
+
+func registerHistoryHandlers(mux *http.ServeMux, database *sql.DB) {
+	mux.HandleFunc("GET /api/history", func(w http.ResponseWriter, r *http.Request) {
+		sinceStr := r.URL.Query().Get("since")
+		var since time.Time
+		var err error
+		if sinceStr != "" {
+			since, err = time.Parse(time.RFC3339, sinceStr)
+			if err != nil {
+				http.Error(w, "invalid since parameter (RFC3339 expected)", http.StatusBadRequest)
+				return
+			}
+		} else {
+			// Default to 1 hour ago if not specified
+			since = time.Now().Add(-1 * time.Hour)
+		}
+
+		store := db.NewHistoryStore(database)
+		updates, err := store.GetUpdates(since)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(updates); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
 }
 
 func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {

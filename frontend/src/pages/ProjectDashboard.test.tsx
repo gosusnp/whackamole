@@ -19,7 +19,7 @@ vi.mock('../components/ui/Tabs', () => ({
     onValueChange,
     value,
   }: {
-    items: { id: string; label: string; content: unknown }[];
+    items: { id: string; label: string; content: unknown; notificationCount?: number }[];
     onValueChange?: (id: string) => void;
     value?: string;
   }) => (
@@ -32,6 +32,7 @@ vi.mock('../components/ui/Tabs', () => ({
           aria-selected={value === item.id}
         >
           {item.label}
+          {item.notificationCount ? ` (${item.notificationCount})` : ''}
         </button>
       ))}
     </div>
@@ -45,6 +46,13 @@ vi.mock('../components/CreateProjectDialog', () => ({
 vi.mock('../components/ConfigDialog', () => ({
   ConfigDialog: () => <div data-testid="config-dialog" />,
 }));
+
+vi.mock('../hooks/useHistoryPolling', () => ({
+  useHistoryPolling: vi.fn(),
+}));
+
+import { useHistoryPolling } from '../hooks/useHistoryPolling';
+
 const mockProjects = [
   { id: 1, name: 'Alpha', key: 'alpha' },
   { id: 2, name: 'Beta', key: 'beta' },
@@ -59,6 +67,7 @@ describe('ProjectDashboard', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.clearAllMocks();
   });
 
   it('shows loading state initially', () => {
@@ -150,5 +159,29 @@ describe('ProjectDashboard', () => {
     });
 
     expect(setItemSpy).toHaveBeenCalledWith('whack-last-project-id', '2');
+  });
+
+  it('updates notifications for other projects via useHistoryPolling', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockProjects),
+    });
+
+    let capturedOnNotification: (pid: number) => void = () => {};
+    vi.mocked(useHistoryPolling).mockImplementation((_sid, _ote, _ope, onNotification) => {
+      capturedOnNotification = onNotification;
+    });
+
+    render(<ProjectDashboard />);
+
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Alpha' })).toBeInTheDocument());
+
+    // Trigger notification manually via captured callback
+    act(() => {
+      capturedOnNotification(2);
+    });
+
+    // Check if notification badge is rendered (as text in our mock)
+    expect(screen.getByRole('tab', { name: 'Beta (1)' })).toBeInTheDocument();
   });
 });

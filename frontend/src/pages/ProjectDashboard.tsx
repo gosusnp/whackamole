@@ -14,6 +14,7 @@ import { CreateProjectDialog } from '../components/CreateProjectDialog';
 import { DeleteProjectDialog } from '../components/DeleteProjectDialog';
 import { ConfigDialog } from '../components/ConfigDialog';
 import { Sun, Moon } from 'lucide-preact';
+import { useHistoryPolling } from '../hooks/useHistoryPolling';
 
 interface Project {
   id: number;
@@ -29,6 +30,13 @@ export function ProjectDashboard() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(
     localStorage.getItem('whack-last-project-id') || undefined,
   );
+  const [notifications, setNotifications] = useState<Record<number, number>>({});
+  const [taskUpdateEvent, setTaskUpdateEvent] = useState<{
+    projectId: number;
+    taskId: number;
+    operation: string;
+    timestamp: number;
+  } | null>(null);
 
   const fetchProjects = useCallback(
     async (selectId?: string) => {
@@ -64,6 +72,38 @@ export function ProjectDashboard() {
     },
     [selectedProjectId],
   );
+
+  const handleTaskEvent = useCallback(
+    (event: { projectId: number; taskId: number; operation: string; timestamp: number }) => {
+      setTaskUpdateEvent(event);
+    },
+    [],
+  );
+
+  const handleProjectEvent = useCallback(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  const handleNotification = useCallback((pid: number) => {
+    setNotifications((prev) => ({
+      ...prev,
+      [pid]: (prev[pid] || 0) + 1,
+    }));
+  }, []);
+
+  useHistoryPolling(selectedProjectId, handleTaskEvent, handleProjectEvent, handleNotification);
+
+  // Reset notifications for current project
+  useEffect(() => {
+    if (selectedProjectId) {
+      setNotifications((prev) => {
+        if (!prev[Number(selectedProjectId)]) return prev;
+        const next = { ...prev };
+        delete next[Number(selectedProjectId)];
+        return next;
+      });
+    }
+  }, [selectedProjectId]);
 
   // Initialize theme
   useEffect(() => {
@@ -122,7 +162,13 @@ export function ProjectDashboard() {
   const tabItems = projects.map((project) => ({
     id: String(project.id),
     label: project.name,
-    content: <TaskList projectId={project.id} />,
+    notificationCount: notifications[project.id],
+    content: (
+      <TaskList
+        projectId={project.id}
+        taskUpdateEvent={String(project.id) === selectedProjectId ? taskUpdateEvent : null}
+      />
+    ),
     extra: (
       <DeleteProjectDialog
         projectId={project.id}

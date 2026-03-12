@@ -27,3 +27,11 @@ export interface GlobalConfig {
   key: GlobalConfigKey;
   value: string;
 }
+
+export interface History {
+  id: number;
+  createdAt: string;
+  objectType: string;
+  objectId: number;
+  operation: string;
+}

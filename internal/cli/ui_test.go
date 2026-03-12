@@ -224,4 +224,33 @@ func TestUIAPI(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	})
+
+	t.Run("GetHistory", func(t *testing.T) {
+		// Create a project to generate history
+		p := types.Project{Name: "History Project", Key: "hist-p"}
+		body, _ := json.Marshal(p)
+		resp, err := http.Post(server.URL+"/api/projects", "application/json", bytes.NewBuffer(body))
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusCreated, resp.StatusCode)
+
+		// Get history
+		resp, err = http.Get(server.URL + "/api/history")
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var history []types.History
+		err = json.NewDecoder(resp.Body).Decode(&history)
+		require.NoError(t, err)
+		assert.NotEmpty(t, history)
+
+		// Check if at least one entry is for the project creation
+		found := false
+		for _, h := range history {
+			if h.ObjectType == "project" && h.Operation == "create" {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "History should contain project creation event")
+	})
 }
