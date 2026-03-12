@@ -63,7 +63,7 @@ export function TaskTypeBadge({ task, onTypeUpdate }: TaskTypeBadgeProps) {
       onOpenChange={setIsOpen}
       trigger={
         <button className={`btn-ghost badge-${task.type}`} disabled={isUpdating}>
-          {task.type}
+          {TYPE_OPTIONS.find((opt) => opt.value === task.type)?.label || task.type}
         </button>
       }
     >

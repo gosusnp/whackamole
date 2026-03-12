@@ -71,9 +71,20 @@ func (s *TaskStoreTestSuite) TestCreate() {
 }
 
 func (s *TaskStoreTestSuite) TestCreateValidation() {
+	// Empty name
 	_, err := s.taskStore.Create(s.project.ID, "", "", "", "")
 	s.Error(err)
 	s.Contains(err.Error(), "cannot be empty")
+
+	// Invalid type
+	_, err = s.taskStore.Create(s.project.ID, "Task", "Desc", "invalid_type", types.TaskStatusNotStarted)
+	s.Error(err)
+	s.Contains(err.Error(), "invalid task type")
+
+	// Invalid status
+	_, err = s.taskStore.Create(s.project.ID, "Task", "Desc", types.TaskTypeFeat, "invalid_status")
+	s.Error(err)
+	s.Contains(err.Error(), "invalid task status")
 }
 
 func (s *TaskStoreTestSuite) TestGet() {
@@ -115,6 +126,19 @@ func (s *TaskStoreTestSuite) TestUpdate() {
 	s.Equal("task", updates[2].ObjectType)
 	s.Equal(int64(t.ID), updates[2].ObjectID)
 	s.Equal("update", updates[2].Operation)
+
+	// Validation tests for Update
+	_, err = s.taskStore.Update(t.ID, "", "Desc", types.TaskTypeFeat, types.TaskStatusInProgress)
+	s.Error(err)
+	s.Contains(err.Error(), "cannot be empty")
+
+	_, err = s.taskStore.Update(t.ID, "New", "Desc", "invalid_type", types.TaskStatusInProgress)
+	s.Error(err)
+	s.Contains(err.Error(), "invalid task type")
+
+	_, err = s.taskStore.Update(t.ID, "New", "Desc", types.TaskTypeFeat, "invalid_status")
+	s.Error(err)
+	s.Contains(err.Error(), "invalid task status")
 }
 
 func (s *TaskStoreTestSuite) TestPatch() {
@@ -150,6 +174,14 @@ func (s *TaskStoreTestSuite) TestPatch() {
 	_, err = s.taskStore.Patch(t.ID, map[string]interface{}{"name": ""})
 	s.Error(err)
 	s.Contains(err.Error(), "cannot be empty")
+
+	_, err = s.taskStore.Patch(t.ID, map[string]interface{}{"type": "invalid_type"})
+	s.Error(err)
+	s.Contains(err.Error(), "invalid task type")
+
+	_, err = s.taskStore.Patch(t.ID, map[string]interface{}{"status": "invalid_status"})
+	s.Error(err)
+	s.Contains(err.Error(), "invalid task status")
 }
 
 func (s *TaskStoreTestSuite) TestDelete() {

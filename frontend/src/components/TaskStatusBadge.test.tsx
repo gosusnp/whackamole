@@ -69,15 +69,21 @@ describe('TaskStatusBadge', () => {
     vi.unstubAllGlobals();
   });
 
-  it('displays the current status', () => {
+  it('displays the current status label', () => {
     render(<TaskStatusBadge task={mockTask} onStatusUpdate={vi.fn()} />);
-    expect(screen.getByText('notStarted')).toBeInTheDocument();
+    expect(screen.getByText('NOT STARTED')).toBeInTheDocument();
   });
 
-  it('displays completed status', () => {
+  it('displays completed status label', () => {
     const task = { ...mockTask, status: 'completed' };
     render(<TaskStatusBadge task={task} onStatusUpdate={vi.fn()} />);
-    expect(screen.getByText('completed')).toBeInTheDocument();
+    expect(screen.getByText('COMPLETED')).toBeInTheDocument();
+  });
+
+  it('displays raw status value if no label is found', () => {
+    const task = { ...mockTask, status: 'unknown' as TaskStatus };
+    render(<TaskStatusBadge task={task} onStatusUpdate={vi.fn()} />);
+    expect(screen.getByText('unknown')).toBeInTheDocument();
   });
 
   it('calls fetch and onStatusUpdate when a different status is selected', async () => {

@@ -64,7 +64,7 @@ export function TaskStatusBadge({ task, onStatusUpdate }: TaskStatusBadgeProps) 
       onOpenChange={setIsOpen}
       trigger={
         <button className={`btn-ghost badge-status-${task.status}`} disabled={isUpdating}>
-          {task.status}
+          {STATUS_OPTIONS.find((opt) => opt.value === task.status)?.label || task.status}
         </button>
       }
     >
