@@ -27,6 +27,8 @@ export const DeletionProgressBar = memo(function DeletionProgressBar({
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
   const { getDeletion } = useDeletion();
+  const getDeletionRef = useRef(getDeletion);
+  getDeletionRef.current = getDeletion;
 
   const [progress, setProgress] = useState(() => {
     const elapsed = Date.now() - startTime;
@@ -39,7 +41,7 @@ export const DeletionProgressBar = memo(function DeletionProgressBar({
       if (!active) return;
 
       // Check if this task is still being deleted in the global context
-      const isStillPending = !!getDeletion(taskId);
+      const isStillPending = !!getDeletionRef.current(taskId);
       if (!isStillPending) {
         active = false;
         return;
@@ -62,7 +64,7 @@ export const DeletionProgressBar = memo(function DeletionProgressBar({
       active = false;
       cancelAnimationFrame(raf);
     };
-  }, [startTime, taskId, getDeletion]);
+  }, [startTime, taskId]);
 
   const positionClass = position === 'top' ? 'top-0' : 'bottom-0';
 
