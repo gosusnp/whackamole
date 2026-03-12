@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gosusnp/whackamole/internal/types"
 	"github.com/stretchr/testify/suite"
@@ -18,6 +19,7 @@ type TaskStoreTestSuite struct {
 	db           *sql.DB
 	projectStore *ProjectStore
 	taskStore    *TaskStore
+	history      *HistoryStore
 	project      *types.Project
 }
 
@@ -30,8 +32,9 @@ func (s *TaskStoreTestSuite) SetupTest() {
 	database, err := Open(s.dbPath)
 	s.NoError(err)
 	s.db = database
-	s.projectStore = NewProjectStore(database)
-	s.taskStore = NewTaskStore(database)
+	s.history = NewHistoryStore(database)
+	s.projectStore = NewProjectStore(database, s.history)
+	s.taskStore = NewTaskStore(database, s.history)
 
 	// Create a project for the tasks
 	p, err := s.projectStore.Create("Test Project", "tp1")
@@ -57,6 +60,14 @@ func (s *TaskStoreTestSuite) TestCreate() {
 	s.Equal("Desc", t.Description)
 	s.Equal(types.TaskTypeFeat, t.Type)
 	s.Equal(types.TaskStatusNotStarted, t.Status)
+
+	// Verify history event (project create + task create)
+	updates, err := s.history.GetUpdates(time.Time{})
+	s.NoError(err)
+	s.Len(updates, 2)
+	s.Equal("task", updates[1].ObjectType)
+	s.Equal(int64(t.ID), updates[1].ObjectID)
+	s.Equal("create", updates[1].Operation)
 }
 
 func (s *TaskStoreTestSuite) TestCreateValidation() {
@@ -96,6 +107,14 @@ func (s *TaskStoreTestSuite) TestUpdate() {
 	s.Equal("New", updated.Description)
 	s.Equal(types.TaskTypeBug, updated.Type)
 	s.Equal(types.TaskStatusInProgress, updated.Status)
+
+	// Verify history event (project create + task create + task update)
+	updates, err := s.history.GetUpdates(time.Time{})
+	s.NoError(err)
+	s.Len(updates, 3)
+	s.Equal("task", updates[2].ObjectType)
+	s.Equal(int64(t.ID), updates[2].ObjectID)
+	s.Equal("update", updates[2].Operation)
 }
 
 func (s *TaskStoreTestSuite) TestPatch() {
@@ -119,6 +138,14 @@ func (s *TaskStoreTestSuite) TestPatch() {
 	s.Equal(types.TaskStatusInProgress, patched.Status)
 	s.Equal(types.TaskTypeBug, patched.Type)
 
+	// Verify history event (project create + task create + 2 task patches)
+	updates, err := s.history.GetUpdates(time.Time{})
+	s.NoError(err)
+	s.Len(updates, 4)
+	s.Equal("task", updates[3].ObjectType)
+	s.Equal(int64(t.ID), updates[3].ObjectID)
+	s.Equal("update", updates[3].Operation)
+
 	// Test validation in Patch
 	_, err = s.taskStore.Patch(t.ID, map[string]interface{}{"name": ""})
 	s.Error(err)
@@ -132,6 +159,14 @@ func (s *TaskStoreTestSuite) TestDelete() {
 
 	_, err = s.taskStore.Get(t.ID)
 	s.Error(err)
+
+	// Verify history event (project create + task create + task delete)
+	updates, err := s.history.GetUpdates(time.Time{})
+	s.NoError(err)
+	s.Len(updates, 3)
+	s.Equal("task", updates[2].ObjectType)
+	s.Equal(int64(t.ID), updates[2].ObjectID)
+	s.Equal("delete", updates[2].Operation)
 }
 
 func TestTaskStoreSuite(t *testing.T) {

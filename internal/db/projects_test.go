@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gosusnp/whackamole/internal/types"
 	"github.com/stretchr/testify/suite"
@@ -14,9 +15,10 @@ import (
 
 type ProjectStoreTestSuite struct {
 	suite.Suite
-	dbPath string
-	db     *sql.DB
-	store  *ProjectStore
+	dbPath  string
+	db      *sql.DB
+	store   *ProjectStore
+	history *HistoryStore
 }
 
 func (s *ProjectStoreTestSuite) SetupTest() {
@@ -29,7 +31,8 @@ func (s *ProjectStoreTestSuite) SetupTest() {
 	database, err := Open(s.dbPath)
 	s.NoError(err)
 	s.db = database
-	s.store = NewProjectStore(database)
+	s.history = NewHistoryStore(database)
+	s.store = NewProjectStore(database, s.history)
 }
 
 func (s *ProjectStoreTestSuite) TearDownTest() {
@@ -50,6 +53,14 @@ func (s *ProjectStoreTestSuite) TestCreate() {
 	s.Equal(types.ProjectKey("p1"), p.Key)
 	s.False(p.CreatedAt.IsZero())
 	s.False(p.UpdatedAt.IsZero())
+
+	// Verify history event
+	updates, err := s.history.GetUpdates(time.Time{})
+	s.NoError(err)
+	s.Len(updates, 1)
+	s.Equal("project", updates[0].ObjectType)
+	s.Equal(int64(p.ID), updates[0].ObjectID)
+	s.Equal("create", updates[0].Operation)
 }
 
 func (s *ProjectStoreTestSuite) TestCreateAutoKey() {
@@ -148,6 +159,14 @@ func (s *ProjectStoreTestSuite) TestUpdate() {
 	s.Equal(newKey, updated.Key)
 	s.Equal(p.ID, updated.ID)
 	s.False(updated.UpdatedAt.IsZero())
+
+	// Verify history event (create + update)
+	updates, err := s.history.GetUpdates(time.Time{})
+	s.NoError(err)
+	s.Len(updates, 2)
+	s.Equal("project", updates[1].ObjectType)
+	s.Equal(int64(p.ID), updates[1].ObjectID)
+	s.Equal("update", updates[1].Operation)
 }
 
 func (s *ProjectStoreTestSuite) TestDelete() {
@@ -159,6 +178,14 @@ func (s *ProjectStoreTestSuite) TestDelete() {
 
 	_, err = s.store.Get(p.ID)
 	s.Error(err)
+
+	// Verify history event (create + delete)
+	updates, err := s.history.GetUpdates(time.Time{})
+	s.NoError(err)
+	s.Len(updates, 2)
+	s.Equal("project", updates[1].ObjectType)
+	s.Equal(int64(p.ID), updates[1].ObjectID)
+	s.Equal("delete", updates[1].Operation)
 }
 
 func TestProjectStoreSuite(t *testing.T) {

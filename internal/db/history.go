@@ -42,6 +42,21 @@ func (s *HistoryStore) AddUpdate(objectType string, objectID int64, operation st
 	return s.Get(types.HistoryID(id))
 }
 
+// AddUpdateTx inserts a new event record using an existing transaction.
+// It does NOT perform cleanup to avoid side effects in the transaction.
+func (s *HistoryStore) AddUpdateTx(tx *sql.Tx, objectType string, objectID int64, operation string) error {
+	if objectType == "" || operation == "" {
+		return fmt.Errorf("object type and operation cannot be empty")
+	}
+
+	query := "INSERT INTO whack_history (object_type, object_id, operation) VALUES (?, ?, ?)"
+	_, err := tx.Exec(query, objectType, objectID, operation)
+	if err != nil {
+		return fmt.Errorf("failed to add history update in tx: %w", err)
+	}
+	return nil
+}
+
 // GetUpdates fetches all records where created_at > since and performs a passive cleanup.
 func (s *HistoryStore) GetUpdates(since time.Time) ([]types.History, error) {
 	// Passive cleanup

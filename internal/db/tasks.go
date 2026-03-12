@@ -12,11 +12,12 @@ import (
 )
 
 type TaskStore struct {
-	db *sql.DB
+	db      *sql.DB
+	history *HistoryStore
 }
 
-func NewTaskStore(db *sql.DB) *TaskStore {
-	return &TaskStore{db: db}
+func NewTaskStore(db *sql.DB, history *HistoryStore) *TaskStore {
+	return &TaskStore{db: db, history: history}
 }
 
 func (s *TaskStore) Create(projectID types.ProjectID, name, description string, taskType types.TaskType, status types.TaskStatus) (*types.Task, error) {
@@ -33,7 +34,13 @@ func (s *TaskStore) Create(projectID types.ProjectID, name, description string, 
 		status = types.TaskStatusNotStarted
 	}
 
-	res, err := s.db.Exec("INSERT INTO tasks (project_id, name, description, type, status) VALUES (?, ?, ?, ?, ?)",
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	res, err := tx.Exec("INSERT INTO tasks (project_id, name, description, type, status) VALUES (?, ?, ?, ?, ?)",
 		projectID, name, description, taskType, status)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create task: %w", err)
@@ -42,6 +49,14 @@ func (s *TaskStore) Create(projectID types.ProjectID, name, description string, 
 	id, err := res.LastInsertId()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get last insert id: %w", err)
+	}
+
+	if err := s.history.AddUpdateTx(tx, "task", id, "create"); err != nil {
+		return nil, fmt.Errorf("failed to add history: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return s.Get(types.TaskID(id))
@@ -99,11 +114,26 @@ func (s *TaskStore) Update(id types.TaskID, name, description string, taskType t
 		return nil, fmt.Errorf("task name cannot be empty")
 	}
 
-	_, err := s.db.Exec("UPDATE tasks SET name = ?, description = ?, type = ?, status = ? WHERE id = ?",
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	_, err = tx.Exec("UPDATE tasks SET name = ?, description = ?, type = ?, status = ? WHERE id = ?",
 		name, description, taskType, status, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update task: %w", err)
 	}
+
+	if err := s.history.AddUpdateTx(tx, "task", int64(id), "update"); err != nil {
+		return nil, fmt.Errorf("failed to add history: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return s.Get(id)
 }
 
@@ -164,20 +194,50 @@ func (s *TaskStore) Patch(id types.TaskID, updates map[string]interface{}) (*typ
 		}
 	}
 
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
 	query := fmt.Sprintf("UPDATE tasks SET %s WHERE id = ?", strings.Join(setClauses, ", "))
 	args = append(args, id)
 
-	_, err := s.db.Exec(query, args...)
+	_, err = tx.Exec(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch task: %w", err)
 	}
+
+	if err := s.history.AddUpdateTx(tx, "task", int64(id), "update"); err != nil {
+		return nil, fmt.Errorf("failed to add history: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return s.Get(id)
 }
 
 func (s *TaskStore) Delete(id types.TaskID) error {
-	_, err := s.db.Exec("DELETE FROM tasks WHERE id = ?", id)
+	tx, err := s.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	_, err = tx.Exec("DELETE FROM tasks WHERE id = ?", id)
 	if err != nil {
 		return fmt.Errorf("failed to delete task: %w", err)
 	}
+
+	if err := s.history.AddUpdateTx(tx, "task", int64(id), "delete"); err != nil {
+		return fmt.Errorf("failed to add history: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }

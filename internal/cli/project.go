@@ -31,7 +31,8 @@ var projectAddCmd = &cobra.Command{
 
 		key, _ := cmd.Flags().GetString("key")
 
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		p, err := store.Create(args[0], types.ProjectKey(key))
 		if err != nil {
 			return err
@@ -52,7 +53,8 @@ var projectListCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		projects, err := store.List()
 		if err != nil {
 			return err
@@ -86,7 +88,8 @@ var projectRmCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		p, err := store.GetByKey(key)
 		if err != nil {
 			return err
@@ -115,7 +118,8 @@ var projectShowCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		p, err := store.GetByKey(key)
 		if err != nil {
 			return err

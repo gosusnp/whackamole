@@ -64,7 +64,8 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 
 func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 	mux.HandleFunc("GET /api/projects", func(w http.ResponseWriter, r *http.Request) {
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		projects, err := store.List()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -82,7 +83,8 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		project, err := store.Create(p.Name, p.Key)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -102,7 +104,8 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid id", http.StatusBadRequest)
 			return
 		}
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		project, err := store.Get(types.ProjectID(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -126,7 +129,8 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		project, err := store.Update(types.ProjectID(id), p.Name, p.Key)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -145,7 +149,8 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid id", http.StatusBadRequest)
 			return
 		}
-		store := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewProjectStore(database, history)
 		if err := store.Delete(types.ProjectID(id)); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -166,7 +171,8 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid projectId", http.StatusBadRequest)
 			return
 		}
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 		tasks, err := store.ListByProject(types.ProjectID(projectID), true)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -184,7 +190,8 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 		task, err := store.Create(t.ProjectID, t.Name, t.Description, t.Type, t.Status)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -204,7 +211,8 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid id", http.StatusBadRequest)
 			return
 		}
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 		task, err := store.Get(types.TaskID(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -228,7 +236,8 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 		task, err := store.Update(types.TaskID(id), t.Name, t.Description, t.Type, t.Status)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -252,7 +261,8 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 		task, err := store.Patch(types.TaskID(id), updates)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -271,7 +281,8 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid id", http.StatusBadRequest)
 			return
 		}
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 		if err := store.Delete(types.TaskID(id)); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

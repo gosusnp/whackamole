@@ -26,8 +26,9 @@ func TestMCPHandlers(t *testing.T) {
 	require.NoError(t, err)
 	defer database.Close()
 
-	taskStore := db.NewTaskStore(database)
-	projectStore := db.NewProjectStore(database)
+	history := db.NewHistoryStore(database)
+	taskStore := db.NewTaskStore(database, history)
+	projectStore := db.NewProjectStore(database, history)
 
 	// Create a project first
 	p, err := projectStore.Create("Test Project", "p1")

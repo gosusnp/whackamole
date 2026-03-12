@@ -42,13 +42,14 @@ var taskAddCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		pStore := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		pStore := db.NewProjectStore(database, history)
 		p, err := pStore.GetByKey(types.ProjectKey(projectKey))
 		if err != nil {
 			return err
 		}
 
-		store := db.NewTaskStore(database)
+		store := db.NewTaskStore(database, history)
 		t, err := store.Create(p.ID, args[0], taskDesc, types.TaskType(taskType), types.TaskStatus(taskStatus))
 		if err != nil {
 			return err
@@ -75,13 +76,14 @@ var taskListCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		pStore := db.NewProjectStore(database)
+		history := db.NewHistoryStore(database)
+		pStore := db.NewProjectStore(database, history)
 		p, err := pStore.GetByKey(types.ProjectKey(projectKey))
 		if err != nil {
 			return err
 		}
 
-		store := db.NewTaskStore(database)
+		store := db.NewTaskStore(database, history)
 		tasks, err := store.ListByProject(p.ID, taskAll)
 		if err != nil {
 			return err
@@ -122,7 +124,8 @@ var taskRmCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 		err = store.Delete(types.TaskID(id))
 		if err != nil {
 			return err
@@ -149,7 +152,8 @@ var taskUpdateCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 
 		current, err := store.Get(types.TaskID(id))
 		if err != nil {
@@ -204,7 +208,8 @@ var taskShowCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		store := db.NewTaskStore(database)
+		history := db.NewHistoryStore(database)
+		store := db.NewTaskStore(database, history)
 		t, err := store.Get(types.TaskID(id))
 		if err != nil {
 			return err

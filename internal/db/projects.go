@@ -13,11 +13,12 @@ import (
 )
 
 type ProjectStore struct {
-	db *sql.DB
+	db      *sql.DB
+	history *HistoryStore
 }
 
-func NewProjectStore(db *sql.DB) *ProjectStore {
-	return &ProjectStore{db: db}
+func NewProjectStore(db *sql.DB, history *HistoryStore) *ProjectStore {
+	return &ProjectStore{db: db, history: history}
 }
 
 func (s *ProjectStore) Create(name string, key types.ProjectKey) (*types.Project, error) {
@@ -35,7 +36,13 @@ func (s *ProjectStore) Create(name string, key types.ProjectKey) (*types.Project
 		return nil, err
 	}
 
-	res, err := s.db.Exec("INSERT INTO projects (name, key) VALUES (?, ?)", name, key)
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	res, err := tx.Exec("INSERT INTO projects (name, key) VALUES (?, ?)", name, key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create project: %w", err)
 	}
@@ -43,6 +50,14 @@ func (s *ProjectStore) Create(name string, key types.ProjectKey) (*types.Project
 	id, err := res.LastInsertId()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get last insert id: %w", err)
+	}
+
+	if err := s.history.AddUpdateTx(tx, "project", id, "create"); err != nil {
+		return nil, fmt.Errorf("failed to add history: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return s.Get(types.ProjectID(id))
@@ -108,10 +123,25 @@ func (s *ProjectStore) Update(id types.ProjectID, name string, key types.Project
 		return nil, err
 	}
 
-	_, err := s.db.Exec("UPDATE projects SET name = ?, key = ? WHERE id = ?", name, key, id)
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	_, err = tx.Exec("UPDATE projects SET name = ?, key = ? WHERE id = ?", name, key, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update project: %w", err)
 	}
+
+	if err := s.history.AddUpdateTx(tx, "project", int64(id), "update"); err != nil {
+		return nil, fmt.Errorf("failed to add history: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return s.Get(id)
 }
 
@@ -124,9 +154,24 @@ func slugify(s string) string {
 }
 
 func (s *ProjectStore) Delete(id types.ProjectID) error {
-	_, err := s.db.Exec("DELETE FROM projects WHERE id = ?", id)
+	tx, err := s.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	_, err = tx.Exec("DELETE FROM projects WHERE id = ?", id)
 	if err != nil {
 		return fmt.Errorf("failed to delete project: %w", err)
 	}
+
+	if err := s.history.AddUpdateTx(tx, "project", int64(id), "delete"); err != nil {
+		return fmt.Errorf("failed to add history: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }

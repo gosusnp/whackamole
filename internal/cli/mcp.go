@@ -58,8 +58,9 @@ func createMCPServer(path string) (*server.MCPServer, error) {
 		options...,
 	)
 
-	taskStore := db.NewTaskStore(database)
-	projectStore := db.NewProjectStore(database)
+	history := db.NewHistoryStore(database)
+	taskStore := db.NewTaskStore(database, history)
+	projectStore := db.NewProjectStore(database, history)
 
 	// List Tasks
 	s.AddTool(mcp.NewTool("list_tasks",
