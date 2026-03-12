@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { useState, useEffect, useCallback } from 'preact/hooks';
+import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
 import { Columns, Column } from './ui/Columns';
 import { Text } from './ui/Text';
 import { Row } from './ui/Row';
@@ -28,6 +28,12 @@ export function TaskList({ projectId, taskUpdateEvent }: TaskListProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingTaskIds, setPendingTaskIds] = useState<Set<number>>(new Set());
+
+  // Use a ref to track the current tasks list without making it a dependency of effects
+  const tasksRef = useRef<Task[]>(tasks);
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
 
   const fetchTasks = (signal?: AbortSignal) => {
     // We only show loading on initial fetch
@@ -74,20 +80,19 @@ export function TaskList({ projectId, taskUpdateEvent }: TaskListProps) {
           })
           .catch((err) => console.error('Error fetching updated task:', err));
       } else if (taskUpdateEvent.operation === 'create') {
-        setPendingTaskIds((prev) => {
-          // If task is already in the list, don't mark it as pending
-          if (tasks.some((t) => t.id === taskUpdateEvent.taskId)) {
-            return prev;
-          }
-          const next = new Set(prev);
-          next.add(taskUpdateEvent.taskId);
-          return next;
-        });
+        // If task is not already in the list, mark it as pending
+        if (!tasksRef.current.some((t) => t.id === taskUpdateEvent.taskId)) {
+          setPendingTaskIds((prev) => {
+            const next = new Set(prev);
+            next.add(taskUpdateEvent.taskId);
+            return next;
+          });
+        }
       } else if (taskUpdateEvent.operation === 'delete') {
         setTasks((prev) => prev.filter((t) => t.id !== taskUpdateEvent.taskId));
       }
     }
-  }, [taskUpdateEvent, projectId, tasks]);
+  }, [taskUpdateEvent, projectId]);
 
   const handleUpdate = useCallback((taskId: number, updates: Partial<Task>) => {
     setTasks((prevTasks) =>
