@@ -12,5 +12,6 @@ type History struct {
 	CreatedAt  time.Time `json:"createdAt"`
 	ObjectType string    `json:"objectType"`
 	ObjectID   int64     `json:"objectId"`
+	ProjectID  int64     `json:"projectId"`
 	Operation  string    `json:"operation"`
 }

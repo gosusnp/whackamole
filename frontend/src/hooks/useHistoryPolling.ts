@@ -38,26 +38,17 @@ export function useHistoryPolling(
 
           for (const update of updates) {
             if (update.objectType === 'task') {
-              try {
-                const taskRes = await fetch(`/api/tasks/${update.objectId}`);
-                if (!isMounted()) return;
-                if (taskRes.ok) {
-                  const task = await taskRes.json();
-                  const pid = task.projectId;
+              const pid = update.projectId;
 
-                  if (String(pid) === selectedProjectId) {
-                    onTaskEvent({
-                      projectId: pid,
-                      taskId: update.objectId,
-                      operation: update.operation,
-                      timestamp: Date.now(),
-                    });
-                  } else {
-                    onNotification(pid);
-                  }
-                }
-              } catch (err) {
-                console.error('Error fetching task for history:', err);
+              if (String(pid) === selectedProjectId) {
+                onTaskEvent({
+                  projectId: pid,
+                  taskId: update.objectId,
+                  operation: update.operation,
+                  timestamp: Date.now(),
+                });
+              } else {
+                onNotification(pid);
               }
             } else if (update.objectType === 'project') {
               onProjectEvent();

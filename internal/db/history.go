@@ -20,7 +20,7 @@ func NewHistoryStore(db *sql.DB) *HistoryStore {
 }
 
 // AddUpdate inserts a new event record and performs a passive cleanup of records older than 7 days.
-func (s *HistoryStore) AddUpdate(objectType string, objectID int64, operation string) (*types.History, error) {
+func (s *HistoryStore) AddUpdate(objectType string, objectID int64, projectID int64, operation string) (*types.History, error) {
 	if objectType == "" || operation == "" {
 		return nil, fmt.Errorf("object type and operation cannot be empty")
 	}
@@ -28,8 +28,8 @@ func (s *HistoryStore) AddUpdate(objectType string, objectID int64, operation st
 	// Passive cleanup
 	defer s.cleanup()
 
-	query := "INSERT INTO whack_history (object_type, object_id, operation) VALUES (?, ?, ?)"
-	res, err := s.db.Exec(query, objectType, objectID, operation)
+	query := "INSERT INTO whack_history (object_type, object_id, project_id, operation) VALUES (?, ?, ?, ?)"
+	res, err := s.db.Exec(query, objectType, objectID, projectID, operation)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add history update: %w", err)
 	}
@@ -44,13 +44,13 @@ func (s *HistoryStore) AddUpdate(objectType string, objectID int64, operation st
 
 // AddUpdateTx inserts a new event record using an existing transaction.
 // It does NOT perform cleanup to avoid side effects in the transaction.
-func (s *HistoryStore) AddUpdateTx(tx *sql.Tx, objectType string, objectID int64, operation string) error {
+func (s *HistoryStore) AddUpdateTx(tx *sql.Tx, objectType string, objectID int64, projectID int64, operation string) error {
 	if objectType == "" || operation == "" {
 		return fmt.Errorf("object type and operation cannot be empty")
 	}
 
-	query := "INSERT INTO whack_history (object_type, object_id, operation) VALUES (?, ?, ?)"
-	_, err := tx.Exec(query, objectType, objectID, operation)
+	query := "INSERT INTO whack_history (object_type, object_id, project_id, operation) VALUES (?, ?, ?, ?)"
+	_, err := tx.Exec(query, objectType, objectID, projectID, operation)
 	if err != nil {
 		return fmt.Errorf("failed to add history update in tx: %w", err)
 	}
@@ -62,7 +62,7 @@ func (s *HistoryStore) GetUpdates(since time.Time) ([]types.History, error) {
 	// Passive cleanup
 	defer s.cleanup()
 
-	query := "SELECT id, created_at, object_type, object_id, operation FROM whack_history WHERE created_at > ? ORDER BY created_at ASC"
+	query := "SELECT id, created_at, object_type, object_id, project_id, operation FROM whack_history WHERE created_at > ? ORDER BY created_at ASC"
 	rows, err := s.db.Query(query, since)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get history updates: %w", err)
@@ -72,7 +72,7 @@ func (s *HistoryStore) GetUpdates(since time.Time) ([]types.History, error) {
 	var updates []types.History
 	for rows.Next() {
 		var h types.History
-		if err := rows.Scan(&h.ID, &h.CreatedAt, &h.ObjectType, &h.ObjectID, &h.Operation); err != nil {
+		if err := rows.Scan(&h.ID, &h.CreatedAt, &h.ObjectType, &h.ObjectID, &h.ProjectID, &h.Operation); err != nil {
 			return nil, fmt.Errorf("failed to scan history update: %w", err)
 		}
 		updates = append(updates, h)
@@ -87,8 +87,8 @@ func (s *HistoryStore) GetUpdates(since time.Time) ([]types.History, error) {
 
 func (s *HistoryStore) Get(id types.HistoryID) (*types.History, error) {
 	var h types.History
-	err := s.db.QueryRow("SELECT id, created_at, object_type, object_id, operation FROM whack_history WHERE id = ?", id).
-		Scan(&h.ID, &h.CreatedAt, &h.ObjectType, &h.ObjectID, &h.Operation)
+	err := s.db.QueryRow("SELECT id, created_at, object_type, object_id, project_id, operation FROM whack_history WHERE id = ?", id).
+		Scan(&h.ID, &h.CreatedAt, &h.ObjectType, &h.ObjectID, &h.ProjectID, &h.Operation)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("history event not found with ID: %d", id)

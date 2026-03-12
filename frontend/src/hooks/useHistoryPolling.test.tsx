@@ -79,10 +79,10 @@ describe('useHistoryPolling', () => {
         createdAt: new Date().toISOString(),
         objectType: 'task',
         objectId: 10,
+        projectId: 2,
         operation: 'update',
       },
     ];
-    const mockTask = { id: 10, projectId: 2 };
 
     mockFetch
       .mockResolvedValueOnce({
@@ -92,11 +92,7 @@ describe('useHistoryPolling', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockHistory),
-      }) // second poll
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockTask),
-      }); // task fetch
+      }); // second poll
 
     render(
       <TestComponent
@@ -123,10 +119,10 @@ describe('useHistoryPolling', () => {
         createdAt: new Date().toISOString(),
         objectType: 'task',
         objectId: 10,
+        projectId: 1,
         operation: 'update',
       },
     ];
-    const mockTask = { id: 10, projectId: 1 };
 
     mockFetch
       .mockResolvedValueOnce({
@@ -136,11 +132,7 @@ describe('useHistoryPolling', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockHistory),
-      }) // second poll
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockTask),
-      }); // task fetch
+      }); // second poll
 
     render(
       <TestComponent
@@ -173,6 +165,7 @@ describe('useHistoryPolling', () => {
         createdAt: new Date().toISOString(),
         objectType: 'project',
         objectId: 2,
+        projectId: 2,
         operation: 'update',
       },
     ];

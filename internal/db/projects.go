@@ -52,7 +52,7 @@ func (s *ProjectStore) Create(name string, key types.ProjectKey) (*types.Project
 		return nil, fmt.Errorf("failed to get last insert id: %w", err)
 	}
 
-	if err := s.history.AddUpdateTx(tx, "project", id, "create"); err != nil {
+	if err := s.history.AddUpdateTx(tx, "project", id, id, "create"); err != nil {
 		return nil, fmt.Errorf("failed to add history: %w", err)
 	}
 
@@ -134,7 +134,7 @@ func (s *ProjectStore) Update(id types.ProjectID, name string, key types.Project
 		return nil, fmt.Errorf("failed to update project: %w", err)
 	}
 
-	if err := s.history.AddUpdateTx(tx, "project", int64(id), "update"); err != nil {
+	if err := s.history.AddUpdateTx(tx, "project", int64(id), int64(id), "update"); err != nil {
 		return nil, fmt.Errorf("failed to add history: %w", err)
 	}
 
@@ -165,7 +165,7 @@ func (s *ProjectStore) Delete(id types.ProjectID) error {
 		return fmt.Errorf("failed to delete project: %w", err)
 	}
 
-	if err := s.history.AddUpdateTx(tx, "project", int64(id), "delete"); err != nil {
+	if err := s.history.AddUpdateTx(tx, "project", int64(id), int64(id), "delete"); err != nil {
 		return fmt.Errorf("failed to add history: %w", err)
 	}
 

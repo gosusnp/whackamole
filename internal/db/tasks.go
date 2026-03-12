@@ -55,7 +55,7 @@ func (s *TaskStore) Create(projectID types.ProjectID, name, description string, 
 		return nil, fmt.Errorf("failed to get last insert id: %w", err)
 	}
 
-	if err := s.history.AddUpdateTx(tx, "task", id, "create"); err != nil {
+	if err := s.history.AddUpdateTx(tx, "task", id, int64(projectID), "create"); err != nil {
 		return nil, fmt.Errorf("failed to add history: %w", err)
 	}
 
@@ -132,13 +132,19 @@ func (s *TaskStore) Update(id types.TaskID, name, description string, taskType t
 	}
 	defer func() { _ = tx.Rollback() }()
 
+	var projectID int64
+	err = tx.QueryRow("SELECT project_id FROM tasks WHERE id = ?", id).Scan(&projectID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get project id: %w", err)
+	}
+
 	_, err = tx.Exec("UPDATE tasks SET name = ?, description = ?, type = ?, status = ? WHERE id = ?",
 		name, description, taskType, status, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update task: %w", err)
 	}
 
-	if err := s.history.AddUpdateTx(tx, "task", int64(id), "update"); err != nil {
+	if err := s.history.AddUpdateTx(tx, "task", int64(id), projectID, "update"); err != nil {
 		return nil, fmt.Errorf("failed to add history: %w", err)
 	}
 
@@ -218,6 +224,12 @@ func (s *TaskStore) Patch(id types.TaskID, updates map[string]interface{}) (*typ
 	}
 	defer func() { _ = tx.Rollback() }()
 
+	var projectID int64
+	err = tx.QueryRow("SELECT project_id FROM tasks WHERE id = ?", id).Scan(&projectID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get project id: %w", err)
+	}
+
 	query := fmt.Sprintf("UPDATE tasks SET %s WHERE id = ?", strings.Join(setClauses, ", "))
 	args = append(args, id)
 
@@ -226,7 +238,7 @@ func (s *TaskStore) Patch(id types.TaskID, updates map[string]interface{}) (*typ
 		return nil, fmt.Errorf("failed to patch task: %w", err)
 	}
 
-	if err := s.history.AddUpdateTx(tx, "task", int64(id), "update"); err != nil {
+	if err := s.history.AddUpdateTx(tx, "task", int64(id), projectID, "update"); err != nil {
 		return nil, fmt.Errorf("failed to add history: %w", err)
 	}
 
@@ -244,12 +256,23 @@ func (s *TaskStore) Delete(id types.TaskID) error {
 	}
 	defer func() { _ = tx.Rollback() }()
 
+	var projectID int64
+	err = tx.QueryRow("SELECT project_id FROM tasks WHERE id = ?", id).Scan(&projectID)
+	if err != nil {
+		// If task doesn't exist, we might as well skip history or return error.
+		// Since Delete is supposed to be idempotent, we can check for ErrNoRows.
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		return fmt.Errorf("failed to get project id: %w", err)
+	}
+
 	_, err = tx.Exec("DELETE FROM tasks WHERE id = ?", id)
 	if err != nil {
 		return fmt.Errorf("failed to delete task: %w", err)
 	}
 
-	if err := s.history.AddUpdateTx(tx, "task", int64(id), "delete"); err != nil {
+	if err := s.history.AddUpdateTx(tx, "task", int64(id), projectID, "delete"); err != nil {
 		return fmt.Errorf("failed to add history: %w", err)
 	}
 

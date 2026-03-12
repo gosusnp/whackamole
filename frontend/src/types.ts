@@ -33,5 +33,6 @@ export interface History {
   createdAt: string;
   objectType: string;
   objectId: number;
+  projectId: number;
   operation: string;
 }
