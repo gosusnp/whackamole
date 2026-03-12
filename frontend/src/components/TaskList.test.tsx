@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/preact';
 import { TaskList } from './TaskList';
+import { DeletionProvider } from '../contexts/DeletionContext';
 import type { Task } from '../types';
 
 // Use standard mocks for unit tests
@@ -49,6 +50,21 @@ const mockTasks: Task[] = [
   },
 ];
 
+interface TaskUpdateEvent {
+  projectId: number;
+  taskId: number;
+  operation: string;
+  timestamp: number;
+}
+
+const renderTaskList = (props: { projectId: number; taskUpdateEvent?: TaskUpdateEvent | null }) => {
+  return render(
+    <DeletionProvider>
+      <TaskList {...props} />
+    </DeletionProvider>,
+  );
+};
+
 describe('TaskList', () => {
   const mockFetch = vi.fn();
 
@@ -63,7 +79,7 @@ describe('TaskList', () => {
 
   it('shows loading state initially', () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
-    render(<TaskList projectId={1} />);
+    renderTaskList({ projectId: 1 });
     expect(screen.getByText('Loading tasks...')).toBeInTheDocument();
   });
 
@@ -73,7 +89,7 @@ describe('TaskList', () => {
       json: () => Promise.resolve(mockTasks),
     });
 
-    render(<TaskList projectId={1} />);
+    renderTaskList({ projectId: 1 });
 
     await waitFor(() => {
       expect(screen.getByText('First task')).toBeInTheDocument();
@@ -87,7 +103,7 @@ describe('TaskList', () => {
       json: () => Promise.resolve([]),
     });
 
-    render(<TaskList projectId={1} />);
+    renderTaskList({ projectId: 1 });
 
     await waitFor(() => {
       expect(screen.getByText('No tasks found.')).toBeInTheDocument();
@@ -97,7 +113,7 @@ describe('TaskList', () => {
   it('shows error state when fetch rejects', async () => {
     mockFetch.mockRejectedValue(new Error('Network error'));
 
-    render(<TaskList projectId={1} />);
+    renderTaskList({ projectId: 1 });
 
     expect(await screen.findByText(/failed to load/i)).toBeInTheDocument();
   });
@@ -105,7 +121,7 @@ describe('TaskList', () => {
   it('shows error when response is not ok', async () => {
     mockFetch.mockResolvedValue({ ok: false });
 
-    render(<TaskList projectId={1} />);
+    renderTaskList({ projectId: 1 });
 
     expect(await screen.findByText(/failed to load/i)).toBeInTheDocument();
   });
@@ -132,10 +148,14 @@ describe('TaskList', () => {
       json: () => Promise.resolve([]),
     });
 
-    const { rerender } = render(<TaskList projectId={1} />);
+    const { rerender } = renderTaskList({ projectId: 1 });
     await waitFor(() => screen.getByText('No tasks found.'));
 
-    rerender(<TaskList projectId={2} />);
+    rerender(
+      <DeletionProvider>
+        <TaskList projectId={2} />
+      </DeletionProvider>,
+    );
     await waitFor(() => {
       expect(mockFetch).toHaveBeenLastCalledWith(
         '/api/tasks?projectId=2',
@@ -150,7 +170,7 @@ describe('TaskList', () => {
       json: () => Promise.resolve(mockTasks),
     });
 
-    render(<TaskList projectId={1} />);
+    renderTaskList({ projectId: 1 });
     await waitFor(() => screen.getByTestId('create-task-trigger'));
 
     mockFetch.mockClear();
@@ -178,7 +198,7 @@ describe('TaskList', () => {
         return Promise.resolve({ ok: true });
       });
 
-      render(<TaskList projectId={1} />);
+      renderTaskList({ projectId: 1 });
       await waitFor(() => screen.getByText('First task'));
 
       // 1. Start deleting Task 1 at t=0
@@ -230,24 +250,30 @@ describe('TaskList', () => {
         json: () => Promise.resolve(mockTasks),
       });
 
-      const { rerender } = render(<TaskList projectId={1} taskUpdateEvent={null} />);
+      const { rerender } = renderTaskList({ projectId: 1, taskUpdateEvent: null });
       await waitFor(() => screen.getByText('Tasks (2)'));
 
       // Simulate a create event for project 1
       const createEvent = {
         projectId: 1,
-        taskId: 3,
+        taskId: 99,
         operation: 'create',
         timestamp: Date.now(),
       };
 
-      rerender(<TaskList projectId={1} taskUpdateEvent={createEvent} />);
+      rerender(
+        <DeletionProvider>
+          <TaskList projectId={1} taskUpdateEvent={createEvent} />
+        </DeletionProvider>,
+      );
 
       expect(screen.getByText(/1 new task available. Refresh\?/i)).toBeInTheDocument();
 
       // Simulate same event again - should still show "1 new task" (deduplication)
       rerender(
-        <TaskList projectId={1} taskUpdateEvent={{ ...createEvent, timestamp: Date.now() + 1 }} />,
+        <DeletionProvider>
+          <TaskList projectId={1} taskUpdateEvent={{ ...createEvent, timestamp: Date.now() + 1 }} />
+        </DeletionProvider>,
       );
       expect(screen.getByText(/1 new task available. Refresh\?/i)).toBeInTheDocument();
 
@@ -273,7 +299,7 @@ describe('TaskList', () => {
         json: () => Promise.resolve(mockTasks),
       });
 
-      const { rerender } = render(<TaskList projectId={1} taskUpdateEvent={null} />);
+      const { rerender } = renderTaskList({ projectId: 1, taskUpdateEvent: null });
       await waitFor(() => screen.getByText('First task'));
 
       const updatedTask = { ...mockTasks[0], name: 'Updated First Task' };
@@ -293,7 +319,11 @@ describe('TaskList', () => {
         timestamp: Date.now(),
       };
 
-      rerender(<TaskList projectId={1} taskUpdateEvent={updateEvent} />);
+      rerender(
+        <DeletionProvider>
+          <TaskList projectId={1} taskUpdateEvent={updateEvent} />
+        </DeletionProvider>,
+      );
 
       await waitFor(() => {
         expect(screen.getByText('Updated First Task')).toBeInTheDocument();

@@ -163,12 +163,7 @@ export function ProjectDashboard() {
     id: String(project.id),
     label: project.name,
     notificationCount: notifications[project.id],
-    content: (
-      <TaskList
-        projectId={project.id}
-        taskUpdateEvent={String(project.id) === selectedProjectId ? taskUpdateEvent : null}
-      />
-    ),
+    content: <TaskList projectId={project.id} taskUpdateEvent={taskUpdateEvent} />,
     extra: (
       <DeleteProjectDialog
         projectId={project.id}

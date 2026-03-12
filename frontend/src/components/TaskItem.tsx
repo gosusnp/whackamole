@@ -16,6 +16,7 @@ import { Markdown } from './ui/Markdown';
 import { TaskStatusBadge } from './TaskStatusBadge';
 import { TaskTypeBadge } from './TaskTypeBadge';
 import { DeletionProgressBar } from './DeletionProgressBar';
+import { useDeletion } from '../contexts/DeletionContext';
 import { Edit2, Save, X, Trash2, Undo2, ChevronDown, ChevronUp } from 'lucide-preact';
 import type { Task } from '../types';
 
@@ -27,8 +28,11 @@ interface TaskItemProps {
 
 export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { startDeletion, cancelDeletion, getDeletion } = useDeletion();
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const deletionInfo = getDeletion(task.id);
+  const isDeleting = !!deletionInfo;
   const [name, setName] = useState(task.name);
   const [description, setDescription] = useState(task.description || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -83,23 +87,24 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
     }
   };
 
-  const handleDeleteStart = () => setIsDeleting(true);
-  const handleDeleteCancel = () => setIsDeleting(false);
+  const handleDeleteStart = () => startDeletion(task.id, handleDeleteCommit);
+  const handleDeleteCancel = () => cancelDeletion(task.id);
 
   const handleDeleteCommit = useCallback(async () => {
     try {
       const response = await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
       if (response.ok) {
         onDelete(task.id);
+        cancelDeletion(task.id);
       } else {
         console.error('Failed to delete task');
-        setIsDeleting(false);
+        cancelDeletion(task.id);
       }
     } catch (err) {
       console.error('Error deleting task:', err);
-      setIsDeleting(false);
+      cancelDeletion(task.id);
     }
-  }, [task.id, onDelete]);
+  }, [task.id, onDelete, cancelDeletion]);
 
   const handleCancel = () => {
     setName(task.name);
@@ -136,7 +141,7 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
     >
       {' '}
       {/* Deletion Overlay: Prominent centered Undo and Top-Flush Progress */}
-      {isDeleting && (
+      {isDeleting && deletionInfo && (
         <div className="card-deletion-overlay">
           <Text className="card-deletion-text">Task will be deleted</Text>
           <Button
@@ -148,7 +153,13 @@ export const TaskItem = memo(function TaskItem({ task, onUpdate, onDelete }: Tas
             <Undo2 size={16} className="mr-2" />
             UNDO DELETION
           </Button>
-          <DeletionProgressBar onComplete={handleDeleteCommit} position="top" className="h-[3px]" />
+          <DeletionProgressBar
+            taskId={task.id}
+            startTime={deletionInfo.startTime}
+            onComplete={handleDeleteCommit}
+            position="top"
+            className="h-[3px]"
+          />
         </div>
       )}
       <div className="flex flex-col gap-4">

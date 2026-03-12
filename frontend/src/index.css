@@ -320,14 +320,3 @@ pre, code, .text-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-@keyframes deletion-progress {
-  0% { transform: scaleX(1); background-color: var(--accent-blue); }
-  60% { background-color: var(--accent-blue); }
-  70% { background-color: var(--type-bug); }
-  100% { transform: scaleX(0); background-color: var(--type-bug); }
-}
-
-.animate-deletion {
-  animation: deletion-progress 10s linear forwards;
-  transform-origin: left;
-}
