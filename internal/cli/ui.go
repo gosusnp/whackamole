@@ -53,10 +53,15 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 
 	mux := http.NewServeMux()
 
-	registerProjectHandlers(mux, database)
-	registerTaskHandlers(mux, database)
-	registerConfigHandlers(mux, database)
-	registerHistoryHandlers(mux, database)
+	historyStore := db.NewHistoryStore(database)
+	projectStore := db.NewProjectStore(database, historyStore)
+	taskStore := db.NewTaskStore(database, historyStore)
+	configStore := db.NewConfigStore(database)
+
+	registerProjectHandlers(mux, projectStore)
+	registerTaskHandlers(mux, taskStore)
+	registerConfigHandlers(mux, configStore)
+	registerHistoryHandlers(mux, historyStore)
 
 	// Static File Server
 	mux.Handle("/", http.FileServer(http.FS(sub)))
@@ -64,7 +69,7 @@ func newUIServer(database *sql.DB) (http.Handler, error) {
 	return mux, nil
 }
 
-func registerHistoryHandlers(mux *http.ServeMux, database *sql.DB) {
+func registerHistoryHandlers(mux *http.ServeMux, store *db.HistoryStore) {
 	mux.HandleFunc("GET /api/history", func(w http.ResponseWriter, r *http.Request) {
 		sinceStr := r.URL.Query().Get("since")
 		var since time.Time
@@ -80,7 +85,6 @@ func registerHistoryHandlers(mux *http.ServeMux, database *sql.DB) {
 			since = time.Now().Add(-1 * time.Hour)
 		}
 
-		store := db.NewHistoryStore(database)
 		updates, err := store.GetUpdates(since)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -93,10 +97,8 @@ func registerHistoryHandlers(mux *http.ServeMux, database *sql.DB) {
 	})
 }
 
-func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
+func registerProjectHandlers(mux *http.ServeMux, store *db.ProjectStore) {
 	mux.HandleFunc("GET /api/projects", func(w http.ResponseWriter, r *http.Request) {
-		history := db.NewHistoryStore(database)
-		store := db.NewProjectStore(database, history)
 		projects, err := store.List()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -114,8 +116,6 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewProjectStore(database, history)
 		project, err := store.Create(p.Name, p.Key)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -135,8 +135,6 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid id", http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewProjectStore(database, history)
 		project, err := store.Get(types.ProjectID(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -160,8 +158,6 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewProjectStore(database, history)
 		project, err := store.Update(types.ProjectID(id), p.Name, p.Key)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -180,8 +176,6 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid id", http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewProjectStore(database, history)
 		if err := store.Delete(types.ProjectID(id)); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -190,7 +184,7 @@ func registerProjectHandlers(mux *http.ServeMux, database *sql.DB) {
 	})
 }
 
-func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
+func registerTaskHandlers(mux *http.ServeMux, store *db.TaskStore) {
 	mux.HandleFunc("GET /api/tasks", func(w http.ResponseWriter, r *http.Request) {
 		projectIDStr := r.URL.Query().Get("projectId")
 		if projectIDStr == "" {
@@ -202,8 +196,6 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid projectId", http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewTaskStore(database, history)
 		tasks, err := store.ListByProject(types.ProjectID(projectID), true)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -221,8 +213,6 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewTaskStore(database, history)
 		task, err := store.Create(t.ProjectID, t.Name, t.Description, t.Type, t.Status)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -242,8 +232,6 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid id", http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewTaskStore(database, history)
 		task, err := store.Get(types.TaskID(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -267,8 +255,6 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewTaskStore(database, history)
 		task, err := store.Update(types.TaskID(id), t.Name, t.Description, t.Type, t.Status)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -292,8 +278,6 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewTaskStore(database, history)
 		task, err := store.Patch(types.TaskID(id), updates)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -312,8 +296,6 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 			http.Error(w, "invalid id", http.StatusBadRequest)
 			return
 		}
-		history := db.NewHistoryStore(database)
-		store := db.NewTaskStore(database, history)
 		if err := store.Delete(types.TaskID(id)); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -322,9 +304,8 @@ func registerTaskHandlers(mux *http.ServeMux, database *sql.DB) {
 	})
 }
 
-func registerConfigHandlers(mux *http.ServeMux, database *sql.DB) {
+func registerConfigHandlers(mux *http.ServeMux, store *db.ConfigStore) {
 	mux.HandleFunc("GET /api/configs", func(w http.ResponseWriter, r *http.Request) {
-		store := db.NewConfigStore(database)
 		configs, err := store.GetConfigs()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -348,7 +329,6 @@ func registerConfigHandlers(mux *http.ServeMux, database *sql.DB) {
 			return
 		}
 
-		store := db.NewConfigStore(database)
 		err := store.UpdateConfig(c.Key, c.Value)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
