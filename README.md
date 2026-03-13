@@ -34,10 +34,10 @@
 
 ## 🚀 Installation
 
-Requires Go 1.25+. Ensure `$GOPATH/bin` is on your `$PATH`.
+Quickly install the latest pre-built binary for your platform.
 
 ```bash
-go install github.com/gosusnp/whackamole@latest
+curl -sSL https://raw.githubusercontent.com/gosusnp/whackamole/main/install.sh | sh
 ```
 
 ---
