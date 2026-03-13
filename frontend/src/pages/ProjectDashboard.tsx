@@ -13,6 +13,8 @@ import { Button } from '../components/ui/Button';
 import { CreateProjectDialog } from '../components/CreateProjectDialog';
 import { DeleteProjectDialog } from '../components/DeleteProjectDialog';
 import { ConfigDialog } from '../components/ConfigDialog';
+import { Dialog } from '../components/ui/Dialog';
+import { WhacAMole } from '../components/WhacAMole';
 import { Sun, Moon } from 'lucide-preact';
 import { useHistoryPolling } from '../hooks/useHistoryPolling';
 
@@ -37,6 +39,7 @@ export function ProjectDashboard() {
     operation: string;
     timestamp: number;
   } | null>(null);
+  const [isGameOpen, setIsGameOpen] = useState(false);
 
   const fetchProjects = useCallback(
     async (selectId?: string) => {
@@ -180,17 +183,24 @@ export function ProjectDashboard() {
   return (
     <div className="mx-auto max-w-6xl p-8">
       <Row justify="between" items="center" className="mb-8">
-        <Row items="center" gap={4} fullWidth={false}>
-          <img
-            src="/favicon.png"
-            alt=""
-            className="h-8 w-8"
-            style={{ filter: 'var(--logo-filter)' }}
-          />
-          <Heading level={1} noMargin>
-            whackAmole
-          </Heading>
-        </Row>
+        <div
+          className="cursor-pointer select-none"
+          role="button"
+          aria-label="Play Whac-A-Mole"
+          onClick={() => setIsGameOpen(true)}
+        >
+          <Row items="center" gap={4} fullWidth={false}>
+            <img
+              src="/favicon.png"
+              alt=""
+              className="h-8 w-8"
+              style={{ filter: 'var(--logo-filter)' }}
+            />
+            <Heading level={1} noMargin>
+              whackAmole
+            </Heading>
+          </Row>
+        </div>
         <div className="flex-1" />
         <Row items="center" gap={2} fullWidth={false}>
           <ConfigDialog />
@@ -199,6 +209,10 @@ export function ProjectDashboard() {
           </Button>
         </Row>
       </Row>
+
+      <Dialog open={isGameOpen} onOpenChange={setIsGameOpen} title="Whac-A-Mole!">
+        <WhacAMole key={isGameOpen ? 'open' : 'closed'} />
+      </Dialog>
 
       {projects.length === 0 ? (
         <div className="border-border-base bg-bg-muted/30 flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-20">

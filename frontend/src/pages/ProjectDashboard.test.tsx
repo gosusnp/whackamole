@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/preact';
 import { ProjectDashboard } from './ProjectDashboard';
+import type { ComponentChildren } from 'preact';
 
 vi.mock('../components/TaskList', () => ({
   TaskList: ({ projectId }: { projectId: number }) => (
@@ -45,6 +46,15 @@ vi.mock('../components/CreateProjectDialog', () => ({
 
 vi.mock('../components/ConfigDialog', () => ({
   ConfigDialog: () => <div data-testid="config-dialog" />,
+}));
+
+vi.mock('../components/ui/Dialog', () => ({
+  Dialog: ({ children, open }: { children: ComponentChildren; open: boolean }) =>
+    open ? <div data-testid="dialog">{children}</div> : null,
+}));
+
+vi.mock('../components/WhacAMole', () => ({
+  WhacAMole: () => <div data-testid="whac-a-mole" />,
 }));
 
 vi.mock('../hooks/useHistoryPolling', () => ({
