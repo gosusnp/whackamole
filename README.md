@@ -1,118 +1,94 @@
 # 🔨 whackAmole
 
-**Squash bugs and hammer down tasks with a coordinated stream team of agents.**
+**Squash bugs and hammer down tasks with a coordinated team of agents.**
 
-`whackAmole` is a lightweight task manager built for the age of AI-assisted development. Agents create tasks, you review and adjust them, agents pick them back up—closing the loop between automated work and human judgment.
+[![Go Version](https://img.shields.io/github/go-mod/go-version/gosusnp/whackamole)](https://go.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Have a reviewer agent break down a PR into actionable tasks, open the Web UI to trim and rewrite them, then let a fixer agent work through the list while you watch progress in real time. Use the browser, the terminal, or both—whichever fits your flow.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/whack-ui-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/whack-ui-light.png">
+    <img alt="whackAmole UI" src="docs/whack-ui-light.png" width="800">
+  </picture>
+</p>
+
+`whackAmole` is a local-first, agent-native task manager. It bridges the gap between AI-driven development and human oversight, providing a structured way for agents to propose work and for humans to refine it.
+
+## 🔄 The AI-Human Loop
+
+1.  **Agent Proposes**: An AI agent (via MCP) analyzes your codebase and breaks a feature down into actionable tasks.
+2.  **Human Refines**: You use the **Web UI** to review descriptions, adjust priorities, or merge tasks.
+3.  **Agent Executes**: The agent picks up the "Not Started" tasks one by one, moving them to "In Progress" and finally "Review" for your approval.
+
+---
 
 ## ✨ Features
 
-- **Web UI**: A full-featured browser interface for managing projects and tasks—create, edit, update status, and write rich Markdown descriptions.
-- **CLI**: A fast and intuitive command-line interface (`whack`) for scripting, automation, and terminal-native workflows.
-- **Agent-Ready**: Built-in **MCP (Model Context Protocol)** server allowing AI agents to manage tasks autonomously.
-- **Lightweight**: Built using Go and Preact with fully embedded assets and SQLite storage. A single command for terminal, MCP and UI.
+- **Web UI**: a polished interface with dark mode support and a rich Markdown editor.
+- **Agent-Ready**: native **Model Context Protocol (MCP)** server for seamless integration with Claude, ChatGPT, and other MCP-compatible clients.
+- **CLI-First**: a fast Go binary (`whack`) for terminal-native workflows and automation.
+- **Zero-Config Persistence**: uses SQLite (CGO-free) and embedded migrations. No external database required.
+
+---
 
 ## 🚀 Installation
+
+Requires Go 1.25+. Ensure `$GOPATH/bin` is on your `$PATH`.
 
 ```bash
 go install github.com/gosusnp/whackamole@latest
 ```
 
-## 🛠️ Getting Started
+---
+
+## 🛠️ Quick Start
 
 ### 1. Initialize a Project
-
-Projects are identified by a unique key (e.g., `whack`).
-
 ```bash
-whack project add "My Awesome App" --key whack
+whack project add "My App" --key myapp
+whack config set-local project myapp  # writes .whackamole.yaml in the current directory, scoping this project to the repo
 ```
 
-### 2. Set Your Default Project (Local)
-
-You can set a default project key for your current working directory. This avoids having to pass `--project` to every command. This is stored in a local `.whackamole.yaml` file.
-
+### 2. Manage via CLI
 ```bash
-# Set default project for the current directory
-whack config set-local project whack
-```
-
-### 3. Start Whacking Tasks
-
-You can manage tasks from the **Web UI** or the **CLI**—both are first-class interfaces.
-
-**Launch the Web UI:**
-
-```bash
-whack ui
-```
-
-Spins up a local UI at `http://localhost:8080`.
-
-**Or use the CLI:**
-
-```bash
-# Add a new task
-whack task add "Implement OAuth2" --type feat --desc "Add Google and GitHub providers"
-
-# List your tasks
+whack task add "Fix login bug" --type bug --desc "Fails on empty password"
 whack task list
-
-# Update a task status
-whack task update 1 --status inProgress
-
-# Show task details
-whack task show 1
 ```
 
-## 🌐 Web UI
-
-`whackAmole` includes a full embedded web interface.
-
+### 3. Launch the UI
 ```bash
-whack ui
+whack ui             # opens at http://localhost:8080
+whack ui --port 9000 # use a different port
 ```
 
-By default, the UI listens to `http://localhost:8080`. You can specify a different port using the `--port` flag:
+---
 
-```bash
-whack ui --port 9000
+## 🤖 Agent Configuration
+
+`whackAmole` exposes a standard MCP server (`whack mcp`). Any MCP-compatible client can connect using `command: whack` and `args: ["mcp"]`.
+
+**Claude Desktop** (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "whackamole": {
+      "command": "whack",
+      "args": ["mcp"]
+    }
+  }
+}
 ```
 
-The Web UI lets you:
-- Browse projects and tasks at a glance.
-- Create, edit, and delete tasks with a rich Markdown editor.
-- Update task status and type inline.
-- Work with multiple tasks in parallel.
+Other clients (Cursor, Continue, etc.) follow the same `command`/`args` pattern — consult your client's MCP documentation for the exact config format.
 
-## 🤖 Agent Integration (MCP)
+---
 
-`whackAmole` exposes a full **MCP (Model Context Protocol)** server, giving agents direct access to create, read, and update tasks. Start it with:
+## 📖 Documentation
 
-```bash
-whack mcp
-```
-
-### Available MCP Tools
-
-- `list_tasks`: List all tasks for a specific project key.
-- `add_task`: Create a new task within a project.
-- `update_task`: Update an existing task's name, description, type, or status.
-- `remove_task`: Delete a task by its ID.
-- `show_project`: Get detailed information about a project.
-- `show_task`: Get detailed information about a specific task.
-
-## 💻 Development
-
-The project includes a `Makefile` for common development tasks:
-
-- `./whack-dev`: A wrapper for local development and testing.
-- `make build`: Build the `whack` binary.
-- `make test`: Run all tests with coverage.
-- `make fix`: Format code and run the linter.
-- `make clean`: Remove the built binary.
+- [Architecture Overview](docs/architecture.md) - How data validation and persistence work.
+- [Frontend Guide](docs/frontend.md) - Details on the Preact + Vite setup.
 
 ## 📄 License
-
 MIT
