@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1](https://github.com/gosusnp/whackamole/compare/v0.1.0...v0.1.1) (2026-03-13)
+
+
+### Features
+
+* add whack_history table ([faacd22](https://github.com/gosusnp/whackamole/commit/faacd228a82ad4b3137913e0c9a9a27332ac1a21))
+* limit sqlite connections ([8ac7085](https://github.com/gosusnp/whackamole/commit/8ac70850aac246738a1b81f6d0b3de793b6e99e3))
+* make large card collapsible ([b405a50](https://github.com/gosusnp/whackamole/commit/b405a5036bb79df8af6a5bcab2e6cd5bce9ff8dd))
+* populate history table ([5ecfad2](https://github.com/gosusnp/whackamole/commit/5ecfad2ffbc2269f3523ca4014cc2e03d9082819))
+* **ui:** listen to changes and update the content as needed ([3d7fc0c](https://github.com/gosusnp/whackamole/commit/3d7fc0c31a58ef6014a5a368c4ad0bbe8624c501))
+
+
+### Bug Fixes
+
+* ensure task status consistency ([10d41a3](https://github.com/gosusnp/whackamole/commit/10d41a39aa955483289a35e6115e7b5995853df8))
+* improve history polling performance ([eb83e53](https://github.com/gosusnp/whackamole/commit/eb83e535354ca029a4b404fcd4a66a2772317b30))
+* **ui:** address deletion progress bar cpu load ([2f3217c](https://github.com/gosusnp/whackamole/commit/2f3217c7d7655e0380c3e4ef4f58f231da4e37ec))
+* **ui:** avoid re-render cascades ([0d721d6](https://github.com/gosusnp/whackamole/commit/0d721d6608056b6241eb1f7b14ee24e5f4f5aabc))
+* **ui:** creating task do not trigger the refresh button ([c8e1f81](https://github.com/gosusnp/whackamole/commit/c8e1f8183c065cb4ef45ae8e20609010d7a5ce20))
+* **ui:** deletion progressbar loop restarts on unrelated action ([cbdbbab](https://github.com/gosusnp/whackamole/commit/cbdbbabc58181bbe1d82b64b7dc3bb9aa0347bc7))
+* **ui:** keep track of deletions despite tab changes ([6883b69](https://github.com/gosusnp/whackamole/commit/6883b69cac5782a9b258ea7b62ec74927e6b014a))
+
 ## [0.1.0](https://github.com/gosusnp/whackamole/compare/v0.0.8...v0.1.0) (2026-03-10)
 
 
