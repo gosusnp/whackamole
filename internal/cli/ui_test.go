@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/gosusnp/whackamole/internal/db"
@@ -194,6 +195,47 @@ func TestUIAPI(t *testing.T) {
 		resp, err = http.Get(server.URL + "/api/projects/1")
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("DeleteCompletedTasks", func(t *testing.T) {
+		// Create a project
+		p := types.Project{Name: "Cleanup Project", Key: "clean-p"}
+		pBody, _ := json.Marshal(p)
+		resp, _ := http.Post(server.URL+"/api/projects", "application/json", bytes.NewBuffer(pBody))
+		var createdProject types.Project
+		_ = json.NewDecoder(resp.Body).Decode(&createdProject)
+		pid := createdProject.ID
+
+		// Create tasks
+		tasks := []types.Task{
+			{ProjectID: pid, Name: "Active", Status: types.TaskStatusInProgress},
+			{ProjectID: pid, Name: "Completed", Status: types.TaskStatusCompleted},
+			{ProjectID: pid, Name: "Closed", Status: types.TaskStatusClosed},
+		}
+
+		for _, tk := range tasks {
+			body, _ := json.Marshal(tk)
+			_, _ = http.Post(server.URL+"/api/tasks", "application/json", bytes.NewBuffer(body))
+		}
+
+		// Verify initial count
+		resp, _ = http.Get(server.URL + "/api/tasks?projectId=" + strconv.FormatInt(int64(pid), 10))
+		var initialTasks []types.Task
+		_ = json.NewDecoder(resp.Body).Decode(&initialTasks)
+		assert.Equal(t, 3, len(initialTasks))
+
+		// Call cleanup
+		req, _ := http.NewRequest(http.MethodDelete, server.URL+"/api/tasks/cleanup?projectId="+strconv.FormatInt(int64(pid), 10), nil)
+		resp, err = http.DefaultClient.Do(req)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+
+		// Verify only 1 task remains
+		resp, _ = http.Get(server.URL + "/api/tasks?projectId=" + strconv.FormatInt(int64(pid), 10))
+		var remainingTasks []types.Task
+		_ = json.NewDecoder(resp.Body).Decode(&remainingTasks)
+		assert.Equal(t, 1, len(remainingTasks))
+		assert.Equal(t, "Active", remainingTasks[0].Name)
 	})
 
 	t.Run("ConfigHandlers", func(t *testing.T) {

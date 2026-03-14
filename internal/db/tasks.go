@@ -283,6 +283,61 @@ func (s *TaskStore) Delete(id types.TaskID) error {
 	return nil
 }
 
+func (s *TaskStore) DeleteCompleted(projectID types.ProjectID) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	// Find all tasks that are completed or closed
+	rows, err := tx.Query("SELECT id FROM tasks WHERE project_id = ? AND status IN (?, ?)",
+		projectID, types.TaskStatusCompleted, types.TaskStatusClosed)
+	if err != nil {
+		return fmt.Errorf("failed to find completed tasks: %w", err)
+	}
+	defer rows.Close()
+
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return fmt.Errorf("failed to scan task id: %w", err)
+		}
+		ids = append(ids, id)
+	}
+
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("failed to iterate task ids: %w", err)
+	}
+
+	rows.Close() // explicit close before DELETE exec
+
+	if len(ids) == 0 {
+		return nil
+	}
+
+	// Delete them
+	_, err = tx.Exec("DELETE FROM tasks WHERE project_id = ? AND status IN (?, ?)",
+		projectID, types.TaskStatusCompleted, types.TaskStatusClosed)
+	if err != nil {
+		return fmt.Errorf("failed to delete completed tasks: %w", err)
+	}
+
+	// Add to history
+	for _, id := range ids {
+		if err := s.history.AddUpdateTx(tx, "task", id, int64(projectID), "delete"); err != nil {
+			return fmt.Errorf("failed to add history for task %d: %w", id, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
 func isValidTaskType(t types.TaskType) bool {
 	switch t {
 	case types.TaskTypeFeat, types.TaskTypeBug, types.TaskTypeDocs, types.TaskTypeRefactor, types.TaskTypeChore:

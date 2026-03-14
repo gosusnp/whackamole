@@ -180,4 +180,59 @@ func TestTaskCommands(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Contains(t, b.String(), "Task created")
 	})
+
+	t.Run("ClearFinished", func(t *testing.T) {
+		setup()
+		// Re-add p1 if it was removed
+		{
+			rootCmd.SetArgs([]string{"project", "add", "Test Project", "-k", "p1"})
+			_ = rootCmd.Execute()
+		}
+
+		// Add multiple tasks
+		// Task 1: inProgress
+		{
+			b := bytes.NewBufferString("")
+			rootCmd.SetOut(b)
+			rootCmd.SetArgs([]string{"task", "add", "Active", "-p", "p1", "-s", "inProgress"})
+			_ = rootCmd.Execute()
+		}
+		// Task 2: completed
+		{
+			b := bytes.NewBufferString("")
+			rootCmd.SetOut(b)
+			rootCmd.SetArgs([]string{"task", "add", "Done", "-p", "p1", "-s", "completed"})
+			_ = rootCmd.Execute()
+		}
+
+		// Check count before
+		{
+			b := bytes.NewBufferString("")
+			rootCmd.SetOut(b)
+			rootCmd.SetArgs([]string{"task", "list", "-p", "p1", "-a"})
+			_ = rootCmd.Execute()
+			assert.Contains(t, b.String(), "Active")
+			assert.Contains(t, b.String(), "Done")
+		}
+
+		// Run clear-finished
+		{
+			b := bytes.NewBufferString("")
+			rootCmd.SetOut(b)
+			rootCmd.SetArgs([]string{"task", "clear-finished", "-p", "p1"})
+			err := rootCmd.Execute()
+			assert.NoError(t, err)
+			assert.Contains(t, b.String(), "Cleared finished tasks for project Test Project")
+		}
+
+		// Check count after - only Active should remain
+		{
+			b := bytes.NewBufferString("")
+			rootCmd.SetOut(b)
+			rootCmd.SetArgs([]string{"task", "list", "-p", "p1", "-a"})
+			_ = rootCmd.Execute()
+			assert.Contains(t, b.String(), "Active")
+			assert.NotContains(t, b.String(), "Done")
+		}
+	})
 }

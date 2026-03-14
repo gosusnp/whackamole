@@ -302,6 +302,24 @@ func registerTaskHandlers(mux *http.ServeMux, store *db.TaskStore) {
 		}
 		w.WriteHeader(http.StatusNoContent)
 	})
+
+	mux.HandleFunc("DELETE /api/tasks/cleanup", func(w http.ResponseWriter, r *http.Request) {
+		projectIDStr := r.URL.Query().Get("projectId")
+		if projectIDStr == "" {
+			http.Error(w, "projectId query parameter is required", http.StatusBadRequest)
+			return
+		}
+		projectID, err := strconv.ParseInt(projectIDStr, 10, 64)
+		if err != nil {
+			http.Error(w, "invalid projectId", http.StatusBadRequest)
+			return
+		}
+		if err := store.DeleteCompleted(types.ProjectID(projectID)); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
 }
 
 func registerConfigHandlers(mux *http.ServeMux, store *db.ConfigStore) {

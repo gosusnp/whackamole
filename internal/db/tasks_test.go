@@ -201,6 +201,44 @@ func (s *TaskStoreTestSuite) TestDelete() {
 	s.Equal("delete", updates[2].Operation)
 }
 
+func (s *TaskStoreTestSuite) TestDeleteCompleted() {
+	// Create tasks with different statuses
+	_, _ = s.taskStore.Create(s.project.ID, "Not Started", "", "", types.TaskStatusNotStarted)
+	_, _ = s.taskStore.Create(s.project.ID, "In Progress", "", "", types.TaskStatusInProgress)
+	t3, _ := s.taskStore.Create(s.project.ID, "Completed", "", "", types.TaskStatusCompleted)
+	t4, _ := s.taskStore.Create(s.project.ID, "Closed", "", "", types.TaskStatusClosed)
+
+	// Initial history count (1 project + 4 tasks)
+	updates, _ := s.history.GetUpdates(time.Time{})
+	initialHistoryLen := len(updates)
+	s.Equal(5, initialHistoryLen)
+
+	err := s.taskStore.DeleteCompleted(s.project.ID)
+	s.NoError(err)
+
+	// Verify that only completed/closed tasks are deleted
+	tasks, err := s.taskStore.ListByProject(s.project.ID, true)
+	s.NoError(err)
+	s.Len(tasks, 2)
+	for _, t := range tasks {
+		s.NotEqual(types.TaskStatusCompleted, t.Status)
+		s.NotEqual(types.TaskStatusClosed, t.Status)
+	}
+
+	// Verify history events (2 new delete events)
+	updates, err = s.history.GetUpdates(time.Time{})
+	s.NoError(err)
+	s.Len(updates, initialHistoryLen+2)
+
+	// Check that deleted tasks IDs are in the history
+	deletedIDs := map[int64]bool{int64(t3.ID): true, int64(t4.ID): true}
+	for i := initialHistoryLen; i < len(updates); i++ {
+		s.Equal("task", updates[i].ObjectType)
+		s.Equal("delete", updates[i].Operation)
+		s.True(deletedIDs[updates[i].ObjectID])
+	}
+}
+
 func TestTaskStoreSuite(t *testing.T) {
 	suite.Run(t, new(TaskStoreTestSuite))
 }

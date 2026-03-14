@@ -11,6 +11,7 @@ import { Heading } from './ui/Heading';
 import { Button } from './ui/Button';
 import { TaskItem } from './TaskItem';
 import { CreateTaskDialog } from './CreateTaskDialog';
+import { CleanupTasksDialog } from './CleanupTasksDialog';
 import type { Task } from '../types';
 
 interface TaskListProps {
@@ -108,8 +109,14 @@ export function TaskList({ projectId, taskUpdateEvent }: TaskListProps) {
     fetchTasks();
   };
 
+  const handleTasksCleaned = () => {
+    fetchTasks();
+  };
+
   if (loading) return <Text muted>Loading tasks...</Text>;
   if (error) return <Text muted>{error}</Text>;
+
+  const hasDoneTasks = tasks.some((t) => t.status === 'completed' || t.status === 'closed');
 
   return (
     <Columns vertical gap={6}>
@@ -124,7 +131,12 @@ export function TaskList({ projectId, taskUpdateEvent }: TaskListProps) {
             </Button>
           )}
         </Row>
-        <CreateTaskDialog projectId={projectId} onTaskCreated={handleTaskCreated} />
+        <Row gap={2} fullWidth={false}>
+          {hasDoneTasks && (
+            <CleanupTasksDialog projectId={projectId} onTasksCleaned={handleTasksCleaned} />
+          )}
+          <CreateTaskDialog projectId={projectId} onTaskCreated={handleTaskCreated} />
+        </Row>
       </Row>
 
       {tasks.length === 0 ? (

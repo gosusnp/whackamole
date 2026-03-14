@@ -223,8 +223,42 @@ var taskShowCmd = &cobra.Command{
 		fmt.Fprintf(w, "Type:\t%s\n", t.Type)
 		fmt.Fprintf(w, "Status:\t%s\n", t.Status)
 		fmt.Fprintf(w, "Created At:\t%s\n", t.CreatedAt.Format("2006-01-02 15:04:05"))
-		fmt.Fprintf(w, "Updated At:\t%s\n", t.UpdatedAt.Format("2006-01-02 15:04:05"))
+		fmt.Fprintf(cmd.OutOrStdout(), "Updated At:\t%s\n", t.UpdatedAt.Format("2006-01-02 15:04:05"))
 		w.Flush()
+		return nil
+	},
+}
+
+var taskClearFinishedCmd = &cobra.Command{
+	Use:   "clear-finished",
+	Short: "Clear all completed and closed tasks for a project",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		projectKey := getProjectKey(cmd)
+		if projectKey == "" {
+			return fmt.Errorf("project key is required (use --project or set it in config)")
+		}
+
+		database, err := db.Open(getDBPath(cmd))
+		if err != nil {
+			return err
+		}
+		defer database.Close()
+
+		history := db.NewHistoryStore(database)
+		pStore := db.NewProjectStore(database, history)
+		p, err := pStore.GetByKey(types.ProjectKey(projectKey))
+		if err != nil {
+			return err
+		}
+
+		store := db.NewTaskStore(database, history)
+		err = store.DeleteCompleted(p.ID)
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintf(cmd.OutOrStdout(), "Cleared finished tasks for project %s.\n", p.Name)
 		return nil
 	},
 }
@@ -236,6 +270,7 @@ func init() {
 	taskCmd.AddCommand(taskRmCmd)
 	taskCmd.AddCommand(taskUpdateCmd)
 	taskCmd.AddCommand(taskShowCmd)
+	taskCmd.AddCommand(taskClearFinishedCmd)
 
 	taskAddCmd.Flags().StringVarP(&taskDesc, "desc", "d", "", "Task description")
 	taskAddCmd.Flags().StringVarP(&taskType, "type", "t", string(types.TaskTypeFeat), "Task type (feat, bug, docs, refactor, chore)")
