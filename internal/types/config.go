@@ -9,11 +9,12 @@ type GlobalConfigKey string
 
 const (
 	ConfigKeyMCPInstructions GlobalConfigKey = "mcp_instructions"
+	ConfigKeyLocalMDTemplate GlobalConfigKey = "local_md_template"
 )
 
 func (k GlobalConfigKey) IsValid() bool {
 	switch k {
-	case ConfigKeyMCPInstructions:
+	case ConfigKeyMCPInstructions, ConfigKeyLocalMDTemplate:
 		return true
 	default:
 		return false

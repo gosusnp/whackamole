@@ -78,15 +78,33 @@ func (s *ConfigStoreTestSuite) TestGetConfigs() {
 
 	configs, err := s.store.GetConfigs()
 	s.NoError(err)
-	s.Len(configs, 1)
-	s.Equal(key1, configs[0].Key)
+	// At least 2 configs: local_md_template (default) and mcp_instructions
+	s.GreaterOrEqual(len(configs), 2)
+
+	found := false
+	for _, c := range configs {
+		if c.Key == key1 {
+			found = true
+			break
+		}
+	}
+	s.True(found)
 }
 
-func (s *ConfigStoreTestSuite) TestGetConfigsEmpty() {
+func (s *ConfigStoreTestSuite) TestGetConfigsInitial() {
 	configs, err := s.store.GetConfigs()
 	s.NoError(err)
-	s.NotNil(configs)
-	s.Len(configs, 0)
+	// Should have default local_md_template
+	s.Len(configs, 1)
+	s.Equal(types.ConfigKeyLocalMDTemplate, configs[0].Key)
+}
+
+func (s *ConfigStoreTestSuite) TestDefaultLocalMDTemplate() {
+	config, err := s.store.GetConfig(types.ConfigKeyLocalMDTemplate)
+	s.NoError(err)
+	s.NotNil(config)
+	s.Contains(config.Value, "$PROJECT_KEY")
+	s.Contains(config.Value, "whackAmole project key")
 }
 
 func (s *ConfigStoreTestSuite) TestUpdateConfigValidation() {

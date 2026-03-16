@@ -21,7 +21,7 @@ export interface Task {
   status: TaskStatus;
 }
 
-export type GlobalConfigKey = 'mcp_instructions';
+export type GlobalConfigKey = 'mcp_instructions' | 'local_md_template';
 
 export interface GlobalConfig {
   key: GlobalConfigKey;

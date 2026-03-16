@@ -6,6 +6,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/gosusnp/whackamole/internal/db"
 	"github.com/gosusnp/whackamole/internal/types"
@@ -114,10 +115,96 @@ var configListCmd = &cobra.Command{
 	},
 }
 
+var configWriteLocalMDsCmd = &cobra.Command{
+	Use:   "write-local-mds",
+	Short: "Write or update CLAUDE.local.md and GEMINI.local.md with configured template",
+	Long:  `Write or update CLAUDE.local.md and GEMINI.local.md in the current directory using the global local_md_template.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		projectKey := getProjectKey(cmd)
+		if projectKey == "" {
+			return fmt.Errorf("no project key specified (use -p or set project in .whackamole.yaml)")
+		}
+
+		database, err := db.Open(getDBPath(cmd))
+		if err != nil {
+			return err
+		}
+
+		store := db.NewConfigStore(database)
+		config, err := store.GetConfig(types.ConfigKeyLocalMDTemplate)
+		if err != nil {
+			return err
+		}
+
+		if config == nil || config.Value == "" {
+			return fmt.Errorf("local_md_template is not configured")
+		}
+
+		template := config.Value
+		// Simple $PROJECT_KEY replacement
+		content := strings.ReplaceAll(template, "$PROJECT_KEY", projectKey)
+
+		files := []string{"CLAUDE.local.md", "GEMINI.local.md"}
+		for _, filename := range files {
+			if err := updateLocalMD(filename, content); err != nil {
+				return fmt.Errorf("failed to update %s: %w", filename, err)
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "Updated %s\n", filename)
+		}
+
+		return nil
+	},
+}
+
+func updateLocalMD(filename, content string) error {
+	const startMarker = "<!-- whackAmole-start -->"
+	const endMarker = "<!-- whackAmole-end -->"
+
+	var existingContent string
+	data, err := os.ReadFile(filename)
+	if err == nil {
+		existingContent = string(data)
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+
+	newSection := fmt.Sprintf("%s\n%s\n%s", startMarker, strings.TrimSpace(content), endMarker)
+
+	if existingContent == "" {
+		return os.WriteFile(filename, []byte(newSection+"\n"), 0644)
+	}
+
+	startIdx := strings.Index(existingContent, startMarker)
+	endIdx := strings.Index(existingContent, endMarker)
+
+	if startIdx != -1 && endIdx != -1 && endIdx > startIdx {
+		// Replace existing section
+		updatedContent := existingContent[:startIdx] + newSection + existingContent[endIdx+len(endMarker):]
+		return os.WriteFile(filename, []byte(updatedContent), 0644)
+	}
+
+	// Handle corrupted markers: if only one is present, replace from that point
+	if startIdx != -1 {
+		updatedContent := existingContent[:startIdx] + newSection
+		return os.WriteFile(filename, []byte(updatedContent+"\n"), 0644)
+	}
+	if endIdx != -1 {
+		updatedContent := newSection + existingContent[endIdx+len(endMarker):]
+		return os.WriteFile(filename, []byte(updatedContent), 0644)
+	}
+
+	// Append to end
+	if !strings.HasSuffix(existingContent, "\n") {
+		existingContent += "\n"
+	}
+	return os.WriteFile(filename, []byte(existingContent+"\n"+newSection+"\n"), 0644)
+}
+
 func init() {
 	configCmd.AddCommand(configShowCmd)
 	configCmd.AddCommand(configSetLocalCmd)
 	configCmd.AddCommand(configSetCmd)
 	configCmd.AddCommand(configListCmd)
+	configCmd.AddCommand(configWriteLocalMDsCmd)
 	rootCmd.AddCommand(configCmd)
 }

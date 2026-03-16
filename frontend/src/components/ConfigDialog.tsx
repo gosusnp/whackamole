@@ -16,6 +16,7 @@ import type { GlobalConfig } from '../types';
 export function ConfigDialog() {
   const [open, setOpen] = useState(false);
   const [mcpInstructions, setMcpInstructions] = useState('');
+  const [localMDTemplate, setLocalMDTemplate] = useState('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +36,10 @@ export function ConfigDialog() {
         if (mcp) {
           setMcpInstructions(mcp.value);
         }
+        const template = data.find((c) => c.key === 'local_md_template');
+        if (template) {
+          setLocalMDTemplate(template.value);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch configs', err);
@@ -46,7 +51,8 @@ export function ConfigDialog() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/configs', {
+      // Save both configs
+      const res1 = await fetch('/api/configs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -54,8 +60,22 @@ export function ConfigDialog() {
           value: mcpInstructions,
         }),
       });
-      if (res.ok) {
+
+      const res2 = await fetch('/api/configs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: 'local_md_template',
+          value: localMDTemplate,
+        }),
+      });
+
+      if (res1.ok && res2.ok) {
         setOpen(false);
+      } else {
+        const err1 = !res1.ok ? await res1.text() : '';
+        const err2 = !res2.ok ? await res2.text() : '';
+        console.error('Failed to save config', err1, err2);
       }
     } catch (err) {
       console.error('Failed to save config', err);
@@ -85,6 +105,23 @@ export function ConfigDialog() {
             placeholder="Enter instructions for the agent..."
             value={mcpInstructions}
             onValueChange={(val) => setMcpInstructions(val)}
+            rows={10}
+          />
+        </Column>
+
+        <Column>
+          <Text bold>Local MD Template</Text>
+          <Text small muted className="mb-2">
+            Content for CLAUDE.local.md and GEMINI.local.md files. Use $PROJECT_KEY for the project
+            key replacement.
+          </Text>
+          <TextArea
+            placeholder="## whackAmole task management
+
+- Project key is $PROJECT_KEY
+..."
+            value={localMDTemplate}
+            onValueChange={(val) => setLocalMDTemplate(val)}
             rows={10}
           />
         </Column>
