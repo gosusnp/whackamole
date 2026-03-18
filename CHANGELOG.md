@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3](https://github.com/gosusnp/whackamole/compare/v0.1.2...v0.1.3) (2026-03-16)
+
+
+### Features
+
+* add clear finished ([11c4204](https://github.com/gosusnp/whackamole/commit/11c4204ea75f019ca638bdd23739e24e37504147))
+* add whack config write-local-mds ([ca5bc51](https://github.com/gosusnp/whackamole/commit/ca5bc51bbc81ab5a9f69858276c8e93a3f8b647a))
+
 ## [0.1.2](https://github.com/gosusnp/whackamole/compare/v0.1.1...v0.1.2) (2026-03-13)
 
 
