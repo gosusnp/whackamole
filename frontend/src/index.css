@@ -141,7 +141,7 @@
     @apply w-full bg-bg-muted border border-border-base rounded px-3 py-2 text-sm text-text-base focus:outline-none focus:border-brand-primary transition-colors;
   }
   .textarea-base {
-    @apply w-full bg-bg-muted border border-border-base rounded p-3 text-sm text-text-base focus:outline-none focus:border-brand-primary transition-colors resize-none;
+    @apply w-full bg-bg-muted border border-border-base rounded p-3 text-sm text-text-base focus:outline-none focus:border-brand-primary transition-colors resize-y;
   }
 
   /* Layout: Columns/Rows */
