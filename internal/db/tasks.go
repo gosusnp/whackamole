@@ -28,14 +28,22 @@ func (s *TaskStore) Create(projectID types.ProjectID, name, description string, 
 
 	if taskType == "" {
 		taskType = types.TaskTypeFeat
-	} else if !isValidTaskType(taskType) {
-		return nil, fmt.Errorf("invalid task type: %s", taskType)
+	} else {
+		t, err := types.ParseTaskType(string(taskType))
+		if err != nil {
+			return nil, err
+		}
+		taskType = t
 	}
 
 	if status == "" {
 		status = types.TaskStatusNotStarted
-	} else if !isValidTaskStatus(status) {
-		return nil, fmt.Errorf("invalid task status: %s", status)
+	} else {
+		st, err := types.ParseTaskStatus(string(status))
+		if err != nil {
+			return nil, err
+		}
+		status = st
 	}
 
 	tx, err := s.db.Begin()
@@ -118,12 +126,15 @@ func (s *TaskStore) Update(id types.TaskID, name, description string, taskType t
 		return nil, fmt.Errorf("task name cannot be empty")
 	}
 
-	if !isValidTaskType(taskType) {
-		return nil, fmt.Errorf("invalid task type: %s", taskType)
+	var err error
+	taskType, err = types.ParseTaskType(string(taskType))
+	if err != nil {
+		return nil, err
 	}
 
-	if !isValidTaskStatus(status) {
-		return nil, fmt.Errorf("invalid task status: %s", status)
+	status, err = types.ParseTaskStatus(string(status))
+	if err != nil {
+		return nil, err
 	}
 
 	tx, err := s.db.Begin()
@@ -184,32 +195,34 @@ func (s *TaskStore) Patch(id types.TaskID, updates map[string]interface{}) (*typ
 			setClauses = append(setClauses, "description = ?")
 			args = append(args, description)
 		case "type":
-			taskType, ok := v.(types.TaskType)
-			if !ok {
-				// Also support string for JSON unmarshaling
-				if sVal, ok := v.(string); ok {
-					taskType = types.TaskType(sVal)
-				} else {
-					return nil, fmt.Errorf("invalid type type")
-				}
+			var taskType types.TaskType
+			var err error
+			// Support string for JSON unmarshaling
+			if sVal, ok := v.(string); ok {
+				taskType, err = types.ParseTaskType(sVal)
+			} else if tVal, ok := v.(types.TaskType); ok {
+				taskType, err = types.ParseTaskType(string(tVal))
+			} else {
+				return nil, fmt.Errorf("invalid type type")
 			}
-			if !isValidTaskType(taskType) {
-				return nil, fmt.Errorf("invalid task type: %s", taskType)
+			if err != nil {
+				return nil, err
 			}
 			setClauses = append(setClauses, "type = ?")
 			args = append(args, taskType)
 		case "status":
-			status, ok := v.(types.TaskStatus)
-			if !ok {
-				// Also support string for JSON unmarshaling
-				if sVal, ok := v.(string); ok {
-					status = types.TaskStatus(sVal)
-				} else {
-					return nil, fmt.Errorf("invalid status type")
-				}
+			var status types.TaskStatus
+			var err error
+			// Support string for JSON unmarshaling
+			if sVal, ok := v.(string); ok {
+				status, err = types.ParseTaskStatus(sVal)
+			} else if stVal, ok := v.(types.TaskStatus); ok {
+				status, err = types.ParseTaskStatus(string(stVal))
+			} else {
+				return nil, fmt.Errorf("invalid status type")
 			}
-			if !isValidTaskStatus(status) {
-				return nil, fmt.Errorf("invalid task status: %s", status)
+			if err != nil {
+				return nil, err
 			}
 			setClauses = append(setClauses, "status = ?")
 			args = append(args, status)
@@ -336,22 +349,4 @@ func (s *TaskStore) DeleteCompleted(projectID types.ProjectID) error {
 	}
 
 	return nil
-}
-
-func isValidTaskType(t types.TaskType) bool {
-	switch t {
-	case types.TaskTypeFeat, types.TaskTypeBug, types.TaskTypeDocs, types.TaskTypeRefactor, types.TaskTypeChore:
-		return true
-	default:
-		return false
-	}
-}
-
-func isValidTaskStatus(s types.TaskStatus) bool {
-	switch s {
-	case types.TaskStatusNotStarted, types.TaskStatusInProgress, types.TaskStatusReview, types.TaskStatusBlocked, types.TaskStatusCompleted, types.TaskStatusClosed:
-		return true
-	default:
-		return false
-	}
 }
