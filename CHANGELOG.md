@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4](https://github.com/gosusnp/whackamole/compare/v0.1.3...v0.1.4) (2026-03-20)
+
+
+### Features
+
+* enum field updates are less strict for less agent failures ([951702d](https://github.com/gosusnp/whackamole/commit/951702d17f958404221d5f5a10a6cdc5cd6622cf))
+* **ui:** make description text area resizable ([2bc363c](https://github.com/gosusnp/whackamole/commit/2bc363cc9fd4a3b17d462dd81b8024b58568782c))
+
 ## [0.1.3](https://github.com/gosusnp/whackamole/compare/v0.1.2...v0.1.3) (2026-03-16)
 
 
